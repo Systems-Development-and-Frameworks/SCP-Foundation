@@ -1,24 +1,9 @@
-# sdf
+# Web App
 
-## Project setup
-```
-npm install
-```
+This is a basic reimplementation of the hackernews in VueJS. You can add comments, remove comments, upvote and downvote them.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## How to use
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+1. Run `npm install`.
+2. Run `npm run serve` to start the application server.
+3. Open `localhost:8080` in your web browser to view the application.
