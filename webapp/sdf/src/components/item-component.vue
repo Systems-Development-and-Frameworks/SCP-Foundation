@@ -1,9 +1,9 @@
 <template>
   <div>
     <h2>{{ item.title }} ({{ item.votes }})</h2>
-    <button v-on:click="updateItem(item, 1)">Upvote</button>
+    <button @click="updateItem(item, 1)">Upvote</button>
     <button @click="updateItem(item, -1)">Downvote</button>
-    <button v-on:click="removeItem(item)">Remove</button>
+    <button @click="removeItem(item)">Remove</button>
   </div>
 </template>
 
@@ -15,12 +15,14 @@ export default {
     item: Item,
   },
   methods: {
-    removeItem: function (_item) {
-      this.$emit("removeEvent", _item);
+    removeItem(item) {
+      this.$emit("removeEvent", item);
     },
 
-    updateItem: function (_item, value) {
-      this.$emit("updateEvent", _item, value);
+    updateItem(item, value) {
+      const currentVotes = item.getVotes()
+      item.setVotes(currentVotes + value)
+      this.$emit("updateEvent", item);
     },
   },
 };

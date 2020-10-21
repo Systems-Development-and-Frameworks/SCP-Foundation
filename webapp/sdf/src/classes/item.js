@@ -1,12 +1,18 @@
 export default class  Item{
+    id = null;
     title = null;
     votes = null;
     
-    constructor(title, votes=0){
+    constructor(id, title, votes=0){
+        this.id = id;
         this.title = title;
         this.votes = votes;
     }
 
+    getId(){
+        return this.id;
+    }
+    
     getTitle(){
         return this.title;
     }

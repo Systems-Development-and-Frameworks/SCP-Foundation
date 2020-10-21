@@ -4,59 +4,62 @@
 
     <div v-for="(item, index) in sortedArray" :key="index">
       <ItemComponent
-        v-bind:item="item"
+        :item="item"
         @removeEvent="removeItem"
         @updateEvent="updateItem"
       />
     </div>
-
+      <ItemFormComponent @submitEvent="onSubmit"/>
     <div>
-      <form @submit.prevent="onSubmit">
-        <input type="text" v-model="newTitle" />
-        <input type="submit" value="Create" />
-      </form>
+      
     </div>
   </div>
 </template>
 
 <script>
 import ItemComponent from "./item-component.vue";
+import ItemFormComponent from "./item-form-component.vue";
 import Item from "../classes/item";
 
 export default {
   name: "List",
   components: {
     ItemComponent,
+    ItemFormComponent
   },
   data: function () {
     return {
-      itemList: [new Item("Test12"), new Item("Test")],
-      newTitle: "",
+      itemList: [new Item(1, "Eintrag1"), new Item(2, "Eintrag2")],
     };
   },
   methods: {
-    removeItem: function (item) {
-      const index = this.itemList.indexOf(item);
-      this.itemList.splice(index, 1);
+    removeItem(item) {
+      this.itemList = this.itemList.filter((i) => {
+        return item.id !== i.id;
+      });
     },
-    updateItem: function (item, value) {
-      const index = this.itemList.indexOf(item);
-      this.itemList[index].votes += value;
+
+    updateItem(item) {
+      this.itemList = this.itemList.map((i) => {
+        return item.id === i.id ? item : i;
+      });
     },
-    onSubmit: function () {
-      this.itemList.push(new Item(this.newTitle));
-      this.newTitle = "";
+
+    onSubmit(newTitle) {
+      var biggestId = Math.max.apply(
+        Math,
+        this.itemList.map((item) => {
+          return item.id;
+        })
+      );
+      const newId = biggestId + 1;
+      this.itemList.push(new Item(newId, newTitle));
     },
   },
   computed: {
-    sortedArray: function () {
+    sortedArray() {
       var newArray = [...this.itemList];
-
-      return newArray.sort((a, b) => {
-        if (a.votes > b.votes) return -1;
-        if (a.votes < b.votes) return 1;
-        return 0;
-      });
+      return newArray.sort((a, b) => b.votes - a.votes);
     },
   },
 };
