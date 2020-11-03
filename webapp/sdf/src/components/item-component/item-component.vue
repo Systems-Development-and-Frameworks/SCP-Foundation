@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import Item from "../classes/item";
+import Item from "../../classes/item";
 export default {
   name: "ItemComponent",
   props: {

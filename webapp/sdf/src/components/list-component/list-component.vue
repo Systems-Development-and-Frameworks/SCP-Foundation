@@ -17,9 +17,9 @@
 </template>
 
 <script>
-import ItemComponent from "./item-component.vue";
-import ItemFormComponent from "./item-form-component.vue";
-import Item from "../classes/item";
+import ItemComponent from "../item-component/item-component";
+import ItemFormComponent from "../item-form-component/item-form-component";
+import Item from "../../classes/item";
 
 export default {
   name: "List",
