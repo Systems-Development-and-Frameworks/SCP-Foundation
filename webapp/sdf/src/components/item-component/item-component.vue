@@ -1,9 +1,9 @@
 <template>
   <div>
     <h2>{{ item.title }} ({{ item.votes }})</h2>
-    <button @click="updateItem(item, 1)">Upvote</button>
-    <button @click="updateItem(item, -1)">Downvote</button>
-    <button @click="removeItem(item)">Remove</button>
+    <button class="upvote-button" @click="updateItem(item, 1)">Upvote</button>
+    <button class="downvote-button" @click="updateItem(item, -1)">Downvote</button>
+    <button class="remove-button" @click="removeItem(item)">Remove</button>
   </div>
 </template>
 
