@@ -14,7 +14,6 @@ let component
     })
 
     it('contains item title and votes Expected --> Eintrag (2)', () => {
-        console.log(component.text())
         expect(component.text()).toContain('Eintrag2 (2)')
     })
 

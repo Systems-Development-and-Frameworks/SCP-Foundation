@@ -1,11 +1,15 @@
-import { createWrapper, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import ItemFormComponent from 'components/item-form-component/item-form-component.vue'
 
 describe('item-form-component', () => {
     let component
 
     beforeEach(() => {
-        component = mount(ItemFormComponent)
+        component = mount(ItemFormComponent, {
+            data() {return {
+                title: "test"
+            }}
+        })
     })
 
     it('emits submit event', async () => {
@@ -16,7 +20,6 @@ describe('item-form-component', () => {
     })
 
     it('submit event title == "test"', async () => {
-        await component.setData({title:"test"})
         const submitButton = component.find('.submit-button')
         submitButton.trigger('submit')
         await component.vm.$nextTick()
