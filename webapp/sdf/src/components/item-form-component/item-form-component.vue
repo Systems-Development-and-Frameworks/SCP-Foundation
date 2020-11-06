@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="onSubmit">
     <input type="text" v-model="title" />
-    <input type="submit" value="Create" />
+    <input class="submit-button" type="submit" value="Create" />
   </form>
 </template>
 
@@ -16,8 +16,10 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$emit("submitEvent", this.title);
-      this.title = "";
+      if (this.title != ""){
+        this.$emit("submitEvent", this.title);
+        this.title = "";
+      }
     },
   },
 };
