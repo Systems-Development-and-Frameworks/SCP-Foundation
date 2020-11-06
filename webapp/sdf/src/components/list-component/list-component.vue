@@ -1,18 +1,26 @@
 <template>
   <div>
     <h1>News List</h1>
+    <button class="toggle-btn" @click="orderAscending = !orderAscending">
+      Toggle order
+    </button>
 
-    <div v-for="(item, index) in sortedArray" :key="index">
-      <ItemComponent
-        :item="item"
-        @removeEvent="removeItem"
-        @updateEvent="updateItem"
-      />
+    <div v-if="sortedArray.length > 0">
+      <div v-for="(item, index) in sortedArray" :key="index">
+        <ItemComponent
+          :item="item"
+          @removeEvent="removeItem"
+          @updateEvent="updateItem"
+        />
+      </div>
     </div>
-      <ItemFormComponent @submitEvent="onSubmit"/>
-    <div>
-      
+    <div v-else>
+      <h2 class="list-empty">The list is empty!</h2>
     </div>
+
+
+    <ItemFormComponent @submitEvent="onSubmit" />
+    <div></div>
   </div>
 </template>
 
@@ -25,11 +33,12 @@ export default {
   name: "List",
   components: {
     ItemComponent,
-    ItemFormComponent
+    ItemFormComponent,
   },
   data: function () {
     return {
       itemList: [new Item(1, "Eintrag1"), new Item(2, "Eintrag2")],
+      orderAscending: true,
     };
   },
   methods: {
@@ -59,7 +68,12 @@ export default {
   computed: {
     sortedArray() {
       var newArray = [...this.itemList];
-      return newArray.sort((a, b) => b.votes - a.votes);
+      return newArray.sort((a, b) => {
+        if (this.orderAscending)
+          return b.votes - a.votes
+        else
+          return a.votes - b.votes
+      });
     },
   },
 };
