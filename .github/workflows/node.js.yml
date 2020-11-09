@@ -29,6 +29,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
       working-directory: webapp/sdf
+    - run: npm run lint 
+      working-directory: webapp/sdf
     - run: npm run test:unit
       working-directory: webapp/sdf
     
