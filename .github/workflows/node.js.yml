@@ -9,7 +9,7 @@ on: [push]
 
 defaults:
     run:
-      working-directory: ./webapp/sdf
+      working-directory: ./webapp/
   
 
 jobs:
@@ -29,9 +29,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-      working-directory: webapp/sdf
+      working-directory: webapp/
     - run: npm run lint 
-      working-directory: webapp/sdf
+      working-directory: webapp/
     - run: npm run test:unit
-      working-directory: webapp/sdf
+      working-directory: webapp/
     
