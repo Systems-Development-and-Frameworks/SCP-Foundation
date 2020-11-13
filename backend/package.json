@@ -5,16 +5,19 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint **/*.js --ignore-pattern .eslintrc.js"
+    "lint": "eslint src/**/*.js",
+    "test:unit": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.19.0",
+    "apollo-server-testing": "^2.19.0",
     "graphql": "^15.4.0"
   },
   "devDependencies": {
-    "eslint": "^7.13.0"
+    "eslint": "^7.13.0",
+    "jest": "^26.6.3"
   }
 }
