@@ -34,4 +34,9 @@ jobs:
       working-directory: webapp/
     - run: npm run test:unit
       working-directory: webapp/
+    - run: npm run lint
+      working-directory: backend/
+    - run: npm run test:unit
+      working-directory: backend/
+
     
