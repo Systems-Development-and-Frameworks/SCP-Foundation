@@ -2,7 +2,7 @@ const {DataSource} = require('apollo-datasource');
 
 export class UserDatasource extends DataSource {
 
-    constructor(users = []) {
+    constructor(users = null) {
         super()
 
         this.users = users || [

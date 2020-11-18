@@ -4,8 +4,8 @@ import { resolvers } from './resolvers';
 import { UserDatasource } from './datasource/user-datasource';
 import { PostDatasource } from './datasource/post-datasource';
 
-const udb = null;
-const pdb = null;
+const udb = new UserDatasource();
+const pdb = new PostDatasource(udb);
 
 const dataSources = () => ({ udb, pdb })
 
