@@ -3,7 +3,7 @@ const users = [...Array(5).keys()].map(key => ({
     name: `Name${key}`
   }));
   
-  module.exports = {
+  export const resolvers = {
     Query: {
       findUser: (parent, { id }) => {
         const user = users.find(user => user.id === id);
