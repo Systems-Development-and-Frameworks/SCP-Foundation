@@ -32,9 +32,11 @@
     },
     Mutation: {
       write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, 1),
+      upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.post_id, args.voter.id, 1),
     },
     Post:{
-      author: (parent, args, context) => context.dataSources.udb.getUserById(parent.user_id)
+      author: (parent, args, context) => context.dataSources.udb.getUserById(parent.user_id),
+      votes: (parent, args, context) => context.dataSources.pdb.getVotes(parent.id)
     },
     User: {
       posts: (parent, args, context) => context.dataSources.pdb.getAllPostsFromUser(parent.id)

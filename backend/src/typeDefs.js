@@ -41,7 +41,7 @@ type Mutation {
 
   # ⚠️ FIXME in exercise #4
   # mock voter until we have authentication
-  upvote(id: ID!, voter: UserInput!): Post
+  upvote(post_id: ID!, voter: UserInput!): Post
 
   # 🚀 OPTIONAL
   # downvote(id: ID!, voter: UserInput!): Post

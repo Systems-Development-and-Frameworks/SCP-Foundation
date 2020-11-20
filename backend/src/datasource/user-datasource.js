@@ -18,11 +18,11 @@ export class UserDatasource extends DataSource {
     }
 
     getUserById(id) {
-        return this.users.find(user => user.id === id);
+        return this.users.find(user => user.id == id);
     }
 
     getUserByName(name) {
-        return this.users.find(user => user.name === name);
+        return this.users.find(user => user.name == name);
     }
 
     allUsers() {
@@ -30,7 +30,7 @@ export class UserDatasource extends DataSource {
     }
 
     addUser(name) {
-        if (this.getUserByName(name) === undefined) {
+        if (this.getUserByName(name) == undefined) {
             this.users.push({
                 id : Math.max(...this.users.map(user => user.id), 0) + 1,
                 name: name
