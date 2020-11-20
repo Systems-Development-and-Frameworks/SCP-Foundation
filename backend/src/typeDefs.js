@@ -44,7 +44,7 @@ type Mutation {
   upvote(post_id: ID!, voter: UserInput!): Post
 
   # 🚀 OPTIONAL
-  # downvote(id: ID!, voter: UserInput!): Post
+  downvote(post_id: ID!, voter: UserInput!): Post
 }
 
 input PostInput {

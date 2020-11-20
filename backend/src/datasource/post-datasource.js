@@ -53,9 +53,16 @@ export class PostDatasource extends DataSource {
         let post = this.posts.find(post => post.id == parseInt(post_id));
         
         if (post) {
-            if (!post.votes.find(vote => vote.user_id == user_id)) {
+            let vote = post.votes.find(vote => vote.user_id == user_id)
+
+            if (!vote) {
                 post.votes.push({ user_id: user_id, value: value });
                 this.posts = this.posts.map((local_post) => (local_post.post_id == post_id) ? post : local_post)
+            }
+            else {
+                vote.value = value
+                post.votes[post.votes.indexOf(vote)] = vote
+                this.posts[this.posts.indexOf(post)] = post
             }
 
             return post;
