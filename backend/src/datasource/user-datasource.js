@@ -40,7 +40,7 @@ export class UserDatasource extends DataSource {
 
     removeUser(id) {
         this.users = this.users.filter((user) => {
-            return user.id !== id;
+            return user.id != id;
         });
     }
 }

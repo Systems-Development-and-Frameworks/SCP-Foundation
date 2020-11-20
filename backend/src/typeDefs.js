@@ -37,14 +37,14 @@ type Query {
 type Mutation {
   write(post: PostInput!): Post
   # 🚀 OPTIONAL
-  # delete(id: ID!): Post
+  delete(id: ID!): Post
 
   # ⚠️ FIXME in exercise #4
   # mock voter until we have authentication
-  upvote(post_id: ID!, voter: UserInput!): Post
+  upvote(id: ID!, voter: UserInput!): Post
 
   # 🚀 OPTIONAL
-  downvote(post_id: ID!, voter: UserInput!): Post
+  downvote(id: ID!, voter: UserInput!): Post
 }
 
 input PostInput {

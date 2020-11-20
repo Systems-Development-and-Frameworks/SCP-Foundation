@@ -75,17 +75,25 @@ export class PostDatasource extends DataSource {
         let post = this.posts.find(post => post.id == post_id)
         let votesCounter = 0
         
-        post.votes.forEach(vote => {
-            votesCounter += vote.value
-        });
+        if (post) {
+            post.votes.forEach(vote => {
+                votesCounter += vote.value
+            });
+        }
 
         return votesCounter
     }
 
     deletePost(post_id) {
-        this.posts = this.posts.filter((post) => {
-            return post.id !== post_id;
-        });
+        let postToDelete = this.posts.find(post => post.id == post_id)
+
+        if (postToDelete) {
+            this.posts = this.posts.filter((post) => {
+                return post.id != post_id;
+            });
+        }
+
+        return postToDelete
     }
 
     getAllPostsFromUser(user_id) {
