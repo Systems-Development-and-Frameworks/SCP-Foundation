@@ -24,7 +24,8 @@ type Post {
 }
 
 type User {
-  name: ID!
+  id: ID!
+  name: String!
   posts: [Post]
 }
 
@@ -55,6 +56,6 @@ input PostInput {
 }
 
 input UserInput {
-  name: String!
+  id: ID!
 }
 `;

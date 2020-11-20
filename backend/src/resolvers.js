@@ -30,10 +30,14 @@
       posts: (parent, args, context) => context.dataSources.pdb.allPosts(),
       users: (parent, args, context) => context.dataSources.udb.allUsers()
     },
+    Mutation: {
+      write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, 1),
+    },
     Post:{
-      author: (parent, args, context) => context.dataSources.udb.getUserById(1)
+      author: (parent, args, context) => context.dataSources.udb.getUserById(parent.user_id)
     },
     User: {
+      posts: (parent, args, context) => context.dataSources.pdb.getAllPostsFromUser(parent.id)
     }
   };
   

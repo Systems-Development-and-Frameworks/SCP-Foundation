@@ -32,7 +32,7 @@ export class UserDatasource extends DataSource {
     addUser(name) {
         if (this.getUserByName(name) === undefined) {
             this.users.push({
-                id : Math.max(...this.posts.map(post => post.id), 0) + 1,
+                id : Math.max(...this.users.map(user => user.id), 0) + 1,
                 name: name
             });
         }

@@ -69,6 +69,12 @@ export class PostDatasource extends DataSource {
             return post.id !== post_id;
         });
     }
+
+    getAllPostsFromUser(user_id) {
+        return this.posts.filter((post) => {
+            return post.user_id == user_id;
+        })
+    }
 }
 
 module.exports = PostDatasource
