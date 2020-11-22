@@ -161,7 +161,7 @@ describe("Mutations", () => {
       }
     `;
 
-    const res = await query({ query: WRITE_MUT });
+    const res = await mutate({ mutation: WRITE_MUT });
     expect(res.data).toEqual({
       write: {
         id: "3",
@@ -194,7 +194,7 @@ describe("Mutations", () => {
       }
     `;
 
-    const res = await query({ query: UPVOTE_MUT });
+    const res = await mutate({ mutation: UPVOTE_MUT });
     expect(res.data).toEqual({
       upvote: {
         id: "1",
@@ -216,7 +216,7 @@ describe("Mutations", () => {
     `;
 
     await query({ query: UPVOTE_MUT });
-    const res = await query({ query: UPVOTE_MUT });
+    const res = await mutate({ mutation: UPVOTE_MUT });
     expect(res.data).toEqual({
       upvote: {
         id: "1",
@@ -246,8 +246,8 @@ describe("Mutations", () => {
       }
     `;
 
-    await query({ query: UPVOTE_MUT1 });
-    const res = await query({ query: UPVOTE_MUT2 });
+    await mutate({ mutation: UPVOTE_MUT1 });
+    const res = await mutate({ mutation: UPVOTE_MUT2 });
     expect(res.data).toEqual({
       upvote: {
         id: "1",
