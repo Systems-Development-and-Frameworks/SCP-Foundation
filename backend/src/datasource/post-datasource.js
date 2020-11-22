@@ -11,7 +11,7 @@ export class PostDatasource extends DataSource {
                 id: 1,
                 title: 'Post 1',
                 votes: [],
-                user_id: 1//this.userDatasource.users[0].id
+                user_id: 1
             },
             {
                 id: 2,
@@ -19,10 +19,6 @@ export class PostDatasource extends DataSource {
                 votes: [
                     { user_id: 1, value: 1 }
                 ],
-                // votes: foo(),
-                // votes_backend: [
-                //     { name:'Robert', value:1 }
-                // ],
                 user_id: 2
             }
 
@@ -102,5 +98,3 @@ export class PostDatasource extends DataSource {
         })
     }
 }
-
-module.exports = PostDatasource

@@ -44,5 +44,3 @@ export class UserDatasource extends DataSource {
         });
     }
 }
-
-module.exports = UserDatasource

@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server';
 import { typeDefs } from './typeDefs';
 import { resolvers } from './resolvers';
-import { UserDatasource } from './datasource/user-datasource';
+import { UserDatasource } from './datasource/user-datasource.js';
 import { PostDatasource } from './datasource/post-datasource';
 
 const udb = new UserDatasource();
