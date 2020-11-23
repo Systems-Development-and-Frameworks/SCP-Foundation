@@ -183,6 +183,61 @@ describe("Mutations", () => {
     });
   });
 
+  it("Adds a post to the list", async () => {
+    const WRITE_MUT = gql`
+      mutation {
+        write(post: { title: "abc", author: { id: 1 } }) {
+          id
+          title
+          votes
+          author {
+            id
+            name
+            posts {
+              title
+            }
+          }
+        }
+      }
+    `;
+
+    await mutate({ mutation: WRITE_MUT });
+    expect(pdb.posts.length).toEqual(3);
+  });
+
+  it("Deletes a post", async () => {
+    const DELETE_MUT = gql`
+      mutation {
+        delete(id: 1) {
+          id
+          title
+        }
+      }
+    `;
+
+    const res = await mutate({ mutation: DELETE_MUT });
+    expect(res.data).toEqual({
+      "delete": {
+        "id": "1",
+        "title": "Post 1"
+      }
+    });
+  });
+
+  it("Deletes a post from the list", async () => {
+    const DELETE_MUT = gql`
+      mutation {
+        delete(id: 1) {
+          id
+          title
+        }
+      }
+    `;
+
+    await mutate({ mutation: DELETE_MUT });
+    expect(pdb.posts.length).toEqual(1);
+  });
+
   it("Upvotes a post", async () => {
     const UPVOTE_MUT = gql`
       mutation {
@@ -253,6 +308,80 @@ describe("Mutations", () => {
         id: "1",
         title: "Post 1",
         votes: 2,
+      },
+    });
+  });
+
+  it("Downvotes a post", async () => {
+    const DOWNVOTE_MUT = gql`
+      mutation {
+        downvote(id: 1, voter: { id: 1 }) {
+          id
+          title
+          votes
+        }
+      }
+    `;
+
+    const res = await mutate({ mutation: DOWNVOTE_MUT });
+    expect(res.data).toEqual({
+      downvote: {
+        id: "1",
+        title: "Post 1",
+        votes: -1,
+      },
+    });
+  });
+
+  it("Downvotes a post only once per user", async () => {
+    const DOWNVOTE_MUT = gql`
+      mutation {
+        downvote(id: 1, voter: { id: 1 }) {
+          id
+          title
+          votes
+        }
+      }
+    `;
+
+    await query({ query: DOWNVOTE_MUT });
+    const res = await mutate({ mutation: DOWNVOTE_MUT });
+    expect(res.data).toEqual({
+      downvote: {
+        id: "1",
+        title: "Post 1",
+        votes: -1,
+      },
+    });
+  });
+
+  it("Downvotes twice with two different users", async () => {
+    const DOWNVOTE_MUT1 = gql`
+      mutation {
+        downvote(id: 1, voter: { id: 1 }) {
+          id
+          title
+          votes
+        }
+      }
+    `;
+    const DOWNVOTE_MUT2 = gql`
+      mutation {
+        downvote(id: 1, voter: { id: 2 }) {
+          id
+          title
+          votes
+        }
+      }
+    `;
+
+    await mutate({ mutation: DOWNVOTE_MUT1 });
+    const res = await mutate({ mutation: DOWNVOTE_MUT2 });
+    expect(res.data).toEqual({
+      downvote: {
+        id: "1",
+        title: "Post 1",
+        votes: -2,
       },
     });
   });
