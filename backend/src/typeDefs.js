@@ -33,8 +33,6 @@ type Mutation {
 input PostInput {
   title: String!
 
-  # ⚠️ FIXME in exercise #4
-  # mock author until we have authentication
   author: UserInput!
 }
 
