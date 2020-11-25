@@ -1,3 +1,5 @@
+import {Post, Vote} from "../classes/post"
+
 const {DataSource} = require('apollo-datasource');
 
 export class PostDatasource extends DataSource {
@@ -7,21 +9,8 @@ export class PostDatasource extends DataSource {
 
         this.userDatasource = userDatasource;
         this.posts = posts || [
-            {
-                id: 1,
-                title: 'Post 1',
-                votes: [],
-                user_id: 1
-            },
-            {
-                id: 2,
-                title: 'Post 2',
-                votes: [
-                    { user_id: 1, value: 1 }
-                ],
-                user_id: 2
-            }
-
+            new Post(1, 'Post 1', 1),
+            new Post(2, 'Post 2', 2),
         ];
     }
 
@@ -34,13 +23,7 @@ export class PostDatasource extends DataSource {
             return null;
         }
 
-        let new_post = {
-            id: Math.max(...this.posts.map(post => post.id), 0) + 1,
-            title: title,
-            votes: [],
-            user_id: user_id
-        }
-
+        let new_post = new Post(Math.max(...this.posts.map(post => post.id), 0) + 1, title, user_id);
         this.posts.push(new_post);
         return new_post;
     }
@@ -52,7 +35,7 @@ export class PostDatasource extends DataSource {
             let vote = post.votes.find(vote => vote.user_id == user_id)
 
             if (!vote) {
-                post.votes.push({ user_id: user_id, value: value });
+                post.votes.push(new Vote(user_id, value));
                 this.posts = this.posts.map((local_post) => (local_post.post_id == post_id) ? post : local_post)
             }
             else {

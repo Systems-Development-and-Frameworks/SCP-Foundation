@@ -1,3 +1,5 @@
+import User from "../classes/user";
+
 const {DataSource} = require('apollo-datasource');
 
 export class UserDatasource extends DataSource {
@@ -6,14 +8,8 @@ export class UserDatasource extends DataSource {
         super()
 
         this.users = users || [
-            {
-                id: 1,
-                name: 'Robert',
-            },
-            {
-                id: 2,
-                name: 'Youri',
-            }
+            new User(1, 'Robert','Robert@htw.com', 'password'), 
+            new User(2, 'Youri', 'Youri@htw.com', '12345678')
         ]
     }
 
@@ -29,12 +25,9 @@ export class UserDatasource extends DataSource {
         return this.users;
     }
 
-    addUser(name) {
+    addUser(name, email, password) {
         if (this.getUserByName(name) == undefined) {
-            this.users.push({
-                id : Math.max(...this.users.map(user => user.id), 0) + 1,
-                name: name
-            });
+            this.users.push(new User(Math.max(...this.users.map(user => user.id), 0) + 1, name, email, password));
         }
     }
 
