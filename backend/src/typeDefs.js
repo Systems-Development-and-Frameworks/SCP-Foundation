@@ -36,7 +36,6 @@ type Query {
 
 type Mutation {
   write(post: PostInput!): Post
-  # 🚀 OPTIONAL
   delete(id: ID!): Post
 
   # ⚠️ FIXME in exercise #4
