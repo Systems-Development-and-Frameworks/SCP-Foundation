@@ -5,8 +5,8 @@
     },
     Mutation: {
       write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, args.post.author.id),
-      upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, args.voter.id, 1),
-      downvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, args.voter.id, -1),
+      upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, 1, 1),
+      downvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, 1, -1),
       delete: (parent, args, context) => context.dataSources.pdb.deletePost(args.id)
     },
     Post:{

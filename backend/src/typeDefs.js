@@ -12,6 +12,7 @@ type Post {
 type User {
   id: ID!
   name: String!
+  email: String!
   posts: [Post]
 }
 
@@ -24,19 +25,21 @@ type Mutation {
   write(post: PostInput!): Post
   delete(id: ID!): Post
 
-  upvote(id: ID!, voter: UserInput!): Post
+  upvote(id: ID!): Post
+  downvote(id: ID!): Post
 
-  # 🚀 OPTIONAL
-  downvote(id: ID!, voter: UserInput!): Post
+  """
+  returns a signed JWT or null
+  """
+  login(email: String!, password: String!): String
+
+  """
+  returns a signed JWT or null
+  """
+  signup(name: String!, email: String!, password: String!): String
 }
 
 input PostInput {
   title: String!
-
-  author: UserInput!
-}
-
-input UserInput {
-  id: ID!
 }
 `;
