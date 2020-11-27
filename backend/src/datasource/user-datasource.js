@@ -21,19 +21,36 @@ export class UserDatasource extends DataSource {
         return this.users.find(user => user.name == name);
     }
 
+    getUserByEmail(email) {
+        return this.users.find(user => user.email == email);
+    }
+
     allUsers() {
         return this.users;
     }
 
     addUser(name, email, password) {
-        if (this.getUserByName(name) == undefined) {
-            this.users.push(new User(Math.max(...this.users.map(user => user.id), 0) + 1, name, email, password));
-        }
+        this.users.push(new User(Math.max(...this.users.map(user => user.id), 0) + 1, name, email, password));
     }
 
     removeUser(id) {
         this.users = this.users.filter((user) => {
             return user.id != id;
         });
+    }
+
+    signup(name, email, password) {
+        if (this.getUserByEmail(email) == undefined) {
+            if (this.passwordValid(password)) {
+                this.addUser(name, email, password)
+                return "User added with name: " + name + " and email: " + email + "."
+            }
+            return "Password invalid. Must be at least 8 characters long. User not added."
+        }
+        return "Email already exists. User not added."
+    }
+
+    passwordValid(password) {
+        return password.length >= 8
     }
 }
