@@ -46,7 +46,7 @@ export class UserDatasource extends DataSource {
         if (this.getUserByEmail(email) == undefined) {
             if (this.passwordValid(password)) {
                 this.addUser(name, email, password)
-                return "User added with name: " + name + " and email: " + email + "."
+                return "User added. JWT: " + this.createJWT(this.getUserByEmail(email))
             }
             return "Password invalid. Must be at least 8 characters long. User not added."
         }
@@ -62,9 +62,13 @@ export class UserDatasource extends DataSource {
 
         if (user) {
             if (user.password == password){
-                return jwt.sign({email: email}, privateKey, {algorithm:'HS256'})
+                return this.createJWT(user)
             }
         }
         return "null"
+    }
+
+    createJWT(user) {
+        return jwt.sign({email: user.email}, privateKey, {algorithm:'HS256'})
     }
 }
