@@ -1,4 +1,7 @@
+import { GraphQLSpecifiedByDirective } from "graphql";
 import User from "../classes/user";
+import jwt from "jsonwebtoken"
+import { privateKey } from "../private.key"
 
 const {DataSource} = require('apollo-datasource');
 
@@ -8,8 +11,8 @@ export class UserDatasource extends DataSource {
         super()
 
         this.users = users || [
-            new User(1, 'Robert','Robert@htw.com', 'password'), 
-            new User(2, 'Youri', 'Youri@htw.com', '12345678')
+            new User(1, 'Robert','Robert@htw.de', 'password'), 
+            new User(2, 'Youri', 'Youri@htw.de', '12345678')
         ]
     }
 
@@ -22,7 +25,7 @@ export class UserDatasource extends DataSource {
     }
 
     getUserByEmail(email) {
-        return this.users.find(user => user.email == email);
+        return this.users.find(user => user.email.toLowerCase() === email.toLowerCase());
     }
 
     allUsers() {
@@ -52,5 +55,16 @@ export class UserDatasource extends DataSource {
 
     passwordValid(password) {
         return password.length >= 8
+    }
+
+    login(email, password) {
+        let user = this.getUserByEmail(email)
+
+        if (user) {
+            if (user.password == password){
+                return jwt.sign({email: email}, privateKey, {algorithm:'HS256'})
+            }
+        }
+        return "null"
     }
 }
