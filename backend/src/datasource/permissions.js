@@ -4,13 +4,13 @@ import { privateKey } from "../private.key"
 const { rule, shield } = require("graphql-shield");
 
 const isAuthorised = rule()((parent, args, context) => {
-    // const jwtoken = context.req.headers.authorization.replace('Bearer ', '');
+    const jwtoken = context.req.headers.authorization.replace('Bearer ', '');
 
-    // try {
-    //     const userData = jwt.verify(jwtoken, privateKey)
-    // } catch (e) {
-    //     return false;
-    // }
+    try {
+        const userData = jwt.verify(jwtoken, privateKey)
+    } catch (e) {
+        return false;
+    }
     
     return true;
 });
@@ -21,6 +21,5 @@ export const permissions = shield({
   },
   Mutation: {
     write: isAuthorised,
-    signup: isAuthorised,
   }
 });
