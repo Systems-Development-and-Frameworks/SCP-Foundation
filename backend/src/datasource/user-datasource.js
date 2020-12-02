@@ -2,6 +2,7 @@ import { GraphQLSpecifiedByDirective } from "graphql";
 import User from "../classes/user";
 import jwt from "jsonwebtoken"
 import { privateKey } from "../private.key"
+import bcrypt  from "bcrypt"
 
 const {DataSource} = require('apollo-datasource');
 
@@ -45,8 +46,20 @@ export class UserDatasource extends DataSource {
     signup(name, email, password) {
         if (this.getUserByEmail(email) == undefined) {
             if (this.passwordValid(password)) {
-                this.addUser(name, email, password)
-                return "User added. JWT: " + this.createJWT(this.getUserByEmail(email))
+                jwToken = bcrypt.genSalt(10).then(salt => {
+                    return bcrypt.hash(password, salt)
+                }).then(hash => {
+                    console.log("Hash: " + hash)
+
+                    // bcrypt.compare(password, hash, function(err, result) {
+                    //     console.log(result)
+                    // })
+
+                    //this.addUser(name, email, hash)
+                    return "string"// this.createJWT(this.getUserByEmail(email))
+                })
+                console.log(jwToken)
+                return "Password hashing failed. Try again."
             }
             return "Password invalid. Must be at least 8 characters long. User not added."
         }
@@ -69,6 +82,6 @@ export class UserDatasource extends DataSource {
     }
 
     createJWT(user) {
-        return jwt.sign({email: user.email}, privateKey, {algorithm:'HS256'})
+        return jwt.sign({userId: user.id}, privateKey, {algorithm:'HS256'})
     }
 }
