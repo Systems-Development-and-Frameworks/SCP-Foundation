@@ -11,8 +11,8 @@ export class UserDatasource extends DataSource {
     super();
 
     this.users = users || [
-      new User(1, "Robert", "Robert@htw.de", "password"),
-      new User(2, "Youri", "Youri@htw.de", "12345678"),
+      new User(1, "Robert", "Robert@htw.de", "$2b$10$odTluiJJBK/hnsSOqBZaU.CyMYcvFytWOiqbel8ZUwt3rVP5l9jja"),   // password
+      new User(2, "Youri", "Youri@htw.de", "$2b$10$Ejw.B8tK778rkgDKLko8pOoZpDD6XJYJVF61UNWpMYiAM78oQpuzy"),     // 12345678
     ];
   }
 
@@ -32,6 +32,11 @@ export class UserDatasource extends DataSource {
 
   allUsers() {
     return this.users;
+  }
+
+  userExists(userId) {
+      let user = this.getUserById(userId)
+      return user ? true : false
   }
 
   addUser(name, email, password) {
@@ -60,11 +65,10 @@ export class UserDatasource extends DataSource {
             return bcrypt.hash(password, salt);
           })
           .then((hash) => {
-            console.log("Hash: " + hash);
             this.addUser(name, email, hash)
             return this.createJWT(this.getUserByEmail(email))
           });
-        console.log(jwtToken);
+        
         return jwtToken;
       }
       return "Password invalid. Must be at least 8 characters long. User not added.";
@@ -80,11 +84,17 @@ export class UserDatasource extends DataSource {
     let user = this.getUserByEmail(email);
 
     if (user) {
-      if (user.password == password) {
-        return this.createJWT(user);
-      }
+        let result = bcrypt.compare(password, user.password)
+            .then(res => {
+                return res ? this.createJWT(user) : "User or Password incorrect"
+            }).catch(err => {
+                console.log(err.message)
+                return "User or Password incorrect"
+            })
+        return result
     }
-    return "null";
+
+    return "User or Password incorrect"
   }
 
   createJWT(user) {
