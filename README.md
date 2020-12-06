@@ -21,9 +21,12 @@ You need NodeJS, NPM, VueJS installed on your computer. To run the application, 
 ### Backend
 
 1. Navigate to `./backend/`.
-2. Run `npm install`.
-3. Run `npm run dev` to start the application server.
-4. Open `localhost:4000` in your web browser to view the application.
+2. Create a `.env`file
+3. Add a JWT Secret similar to this `JWT_SECRET = Your_Secret`
+4. Save the `.env`file
+5. Run `npm install`.
+6. Run `npm run dev` to start the application server.
+7. Open `localhost:4000` in your web browser to view the application.
 
 ## Contributors
 
