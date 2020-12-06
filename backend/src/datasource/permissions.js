@@ -5,7 +5,6 @@ const isAuthenticatedUser = rule({cache: 'contextual'})(
     let userData = context.userData
 
     if (context.dataSources.udb.userExists(userData.userId)){
-      console.log("User does exist.")
       context.currentUser = userData.userId
       return true
     }else {

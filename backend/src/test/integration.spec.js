@@ -157,7 +157,7 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI3MTc5M30.Ua0NeHxqN6VUNU4ybRTHHbOQZGa_zw1nJdwDWhDa0TE",
           },
         };
       });
@@ -225,7 +225,7 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI3MTc5M30.Ua0NeHxqN6VUNU4ybRTHHbOQZGa_zw1nJdwDWhDa0TE",
           },
         };
       });
@@ -257,15 +257,6 @@ describe("Mutations", () => {
         }
       }
     `;
-    const UPVOTE_MUT2 = gql`
-      mutation {
-        upvote(id: 1, voter: { id: 2 }) {
-          id
-          title
-          votes
-        }
-      }
-    `;
     describe("unauthenticated", () => {
       beforeEach(() => {
         reqMock = { headers: {} };
@@ -284,7 +275,7 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI3MTc5M30.Ua0NeHxqN6VUNU4ybRTHHbOQZGa_zw1nJdwDWhDa0TE",
           },
         };
       });
@@ -317,10 +308,10 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI2NzMzNH0.qMl6X1SXSD9HOVXXN-gyVStA5AphfTn_FTXU33Jd-40",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI3MTg2OH0.2gXaXBcWK_5s-_GeBazEX0BWKufVwx0AqVUb5Na42mw",
           },
         };
-        const res = await mutate({ mutation: UPVOTE_MUT2 });
+        const res = await mutate({ mutation: UPVOTE_MUT });
         expect(res.data).toEqual({
           upvote: {
             id: "1",
@@ -342,15 +333,6 @@ describe("Mutations", () => {
         }
       }
     `;
-    const DOWNVOTE_MUT2 = gql`
-      mutation {
-        downvote(id: 1, voter: { id: 2 }) {
-          id
-          title
-          votes
-        }
-      }
-    `;
 
     describe("unauthenticated", () => {
       beforeEach(() => {
@@ -362,7 +344,7 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI3MTc5M30.Ua0NeHxqN6VUNU4ybRTHHbOQZGa_zw1nJdwDWhDa0TE",
           },
         };
       });
@@ -395,10 +377,10 @@ describe("Mutations", () => {
         reqMock = {
           headers: {
             authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI2NzMzNH0.qMl6X1SXSD9HOVXXN-gyVStA5AphfTn_FTXU33Jd-40",
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI3MTg2OH0.2gXaXBcWK_5s-_GeBazEX0BWKufVwx0AqVUb5Na42mw",
           },
         };
-        const res = await mutate({ mutation: DOWNVOTE_MUT2 });
+        const res = await mutate({ mutation: DOWNVOTE_MUT });
         expect(res.data).toEqual({
           downvote: {
             id: "1",
@@ -411,43 +393,45 @@ describe("Mutations", () => {
   });
 
   describe("signup", () => {
-    const SIGNUP_MUT = 'mutation {signup(name:"Peter" email:"mail@mail.de" password:"password")}';
+    const SIGNUP_MUT =
+      'mutation {signup(name:"Peter" email:"mail@mail.de" password:"password")}';
     it("Signs a new user up and returns JWT Token", async () => {
       const res = await mutate({ mutation: SIGNUP_MUT });
       expect(res.data).toMatchObject({
-        signup: expect.any(String)
-      })
+        signup: expect.any(String),
+      });
     });
 
     it("Tries to sign up an existing user", async () => {
       await mutate({ mutation: SIGNUP_MUT });
       const res = await mutate({ mutation: SIGNUP_MUT });
       expect(res.data).toMatchObject({
-        signup: "Email already exists. User not added."
-      })
+        signup: "Email already exists. User not added.",
+      });
     });
   });
 
   describe("login", () => {
-const CORRECT_LOGIN_MUT = 'mutation login {login(email: "Robert@hTw.de" password: "password")}';
-const FALSE_LOGIN_MUT = 'mutation login {login(email: "Robert@hTw.de" password: "garbage")}';
+    const CORRECT_LOGIN_MUT =
+      'mutation login {login(email: "Robert@hTw.de" password: "password")}';
+    const FALSE_LOGIN_MUT =
+      'mutation login {login(email: "Robert@hTw.de" password: "garbage")}';
 
-it("Logs a user in and returns a JWT Token", async () => {
-  await mutate({ mutation: CORRECT_LOGIN_MUT });
-  const res = await mutate({ mutation: CORRECT_LOGIN_MUT });
-  expect(res.data).toMatchObject({
-    login: expect.any(String)
-  })
-});
+    it("Logs a user in and returns a JWT Token", async () => {
+      await mutate({ mutation: CORRECT_LOGIN_MUT });
+      const res = await mutate({ mutation: CORRECT_LOGIN_MUT });
+      expect(res.data).toMatchObject({
+        login: expect.any(String),
+      });
+    });
 
-it("Tries to sign up an existing user", async () => {
-  await mutate({ mutation: FALSE_LOGIN_MUT });
-  const res = await mutate({ mutation: FALSE_LOGIN_MUT });
-  expect(res.data).toMatchObject({
-    login: "User or Password incorrect"
-  })
-});
-
+    it("Tries to sign up an existing user", async () => {
+      await mutate({ mutation: FALSE_LOGIN_MUT });
+      const res = await mutate({ mutation: FALSE_LOGIN_MUT });
+      expect(res.data).toMatchObject({
+        login: "User or Password incorrect",
+      });
+    });
   });
 });
 
