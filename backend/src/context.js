@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { privateKey } from "./private.key";
+import { privateKey } from "./config";
 
 export function context ({ req, res }) {
     let token = req.headers.authorization || "";

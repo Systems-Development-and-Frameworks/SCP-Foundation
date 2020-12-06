@@ -1,7 +1,7 @@
 import { GraphQLSpecifiedByDirective } from "graphql";
 import User from "../classes/user";
 import jwt from "jsonwebtoken";
-import { privateKey } from "../private.key";
+import { privateKey } from "../config";
 import bcrypt from "bcrypt";
 
 const { DataSource } = require("apollo-datasource");
@@ -9,7 +9,7 @@ const { DataSource } = require("apollo-datasource");
 export class UserDatasource extends DataSource {
   constructor(users = null) {
     super();
-
+    console.log(privateKey)
     this.users = users || [
       new User(1, "Robert", "Robert@htw.de", "$2b$10$odTluiJJBK/hnsSOqBZaU.CyMYcvFytWOiqbel8ZUwt3rVP5l9jja"),   // password
       new User(2, "Youri", "Youri@htw.de", "$2b$10$Ejw.B8tK778rkgDKLko8pOoZpDD6XJYJVF61UNWpMYiAM78oQpuzy"),     // 12345678
