@@ -1,21 +1,28 @@
 import { gql } from "apollo-server";
 import { createTestClient } from "apollo-server-testing";
 import Server from "../server";
+import { GraphQLError } from "graphql";
 import { UserDatasource } from "../datasource/user-datasource";
 import { PostDatasource } from "../datasource/post-datasource";
 import { Post, Vote } from "../classes/post";
+import { context } from "../context";
 
 const udb = new UserDatasource();
 const pdb = new PostDatasource(udb);
-const server = new Server({ dataSources: () => ({ udb, pdb }) });
+let reqMock;
+let resMock;
+const contextPipeline = () => context({ req: reqMock, res: resMock });
+const server = new Server({
+  dataSources: () => ({ udb, pdb }),
+  context: contextPipeline,
+});
 const { query, mutate } = createTestClient(server);
 
 describe("Queries", () => {
   beforeEach(() => {
-    pdb.posts = [
-      new Post(1, "Post 1", 1),
-      new Post(2, "Post 2", 2),
-    ];
+    reqMock = { headers: {} };
+    resMock = {};
+    pdb.posts = [new Post(1, "Post 1", 1), new Post(2, "Post 2", 2)];
 
     pdb.posts[1].votes.push(new Vote(1, 1));
   });
@@ -103,26 +110,15 @@ describe("Queries", () => {
 
 describe("Mutations", () => {
   beforeEach(() => {
-    pdb.posts = [
-      {
-        id: 1,
-        title: "Post 1",
-        votes: [],
-        user_id: 1,
-      },
-      {
-        id: 2,
-        title: "Post 2",
-        votes: [{ user_id: 1, value: 1 }],
-        user_id: 2,
-      },
-    ];
+    pdb.posts = [new Post(1, "Post 1", 1), new Post(2, "Post 2", 2)];
+    pdb.votePost(2, 1, 1);
+    resMock = {};
   });
 
-  it("Creates a post", async () => {
+  describe("write", () => {
     const WRITE_MUT = gql`
       mutation {
-        write(post: { title: "abc"}) {
+        write(post: { title: "abc" }) {
           id
           title
           votes
@@ -137,51 +133,66 @@ describe("Mutations", () => {
       }
     `;
 
-    const res = await mutate({ mutation: WRITE_MUT });
-    expect(res.data).toEqual({
-      write: {
-        id: "3",
-        title: "abc",
-        votes: 0,
-        author: {
-          id: "1",
-          name: "Robert",
-          posts: [
-            {
-              title: "Post 1",
+    describe("unauthenticated", () => {
+      beforeEach(() => {
+        reqMock = { headers: {} };
+      });
+
+      it("Throws an authorization error", async () => {
+        const res = await mutate({ mutation: WRITE_MUT });
+        expect(res).toMatchObject({
+          data: { write: null },
+          errors: [new GraphQLError("Not Authorised!")],
+        });
+      });
+
+      it("Does not add a post to the list", async () => {
+        await mutate({ mutation: WRITE_MUT });
+        expect(pdb.posts.length).toEqual(2);
+      });
+    });
+
+    describe("authenticated", () => {
+      beforeEach(() => {
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+          },
+        };
+      });
+
+      it("Creates a post", async () => {
+        const res = await mutate({ mutation: WRITE_MUT });
+        expect(res.data).toEqual({
+          write: {
+            id: "3",
+            title: "abc",
+            votes: 0,
+            author: {
+              id: "1",
+              name: "Robert",
+              posts: [
+                {
+                  title: "Post 1",
+                },
+                {
+                  title: "abc",
+                },
+              ],
             },
-            {
-              title: "abc",
-            },
-          ],
-        },
-      },
+          },
+        });
+      });
+
+      it("Adds a post to the list", async () => {
+        await mutate({ mutation: WRITE_MUT });
+        expect(pdb.posts.length).toEqual(3);
+      });
     });
   });
 
-  it("Adds a post to the list", async () => {
-    const WRITE_MUT = gql`
-      mutation {
-        write(post: { title: "abc"}) {
-          id
-          title
-          votes
-          author {
-            id
-            name
-            posts {
-              title
-            }
-          }
-        }
-      }
-    `;
-
-    await mutate({ mutation: WRITE_MUT });
-    expect(pdb.posts.length).toEqual(3);
-  });
-
-  it("Deletes a post", async () => {
+  describe("delete", () => {
     const DELETE_MUT = gql`
       mutation {
         delete(id: 1) {
@@ -191,74 +202,53 @@ describe("Mutations", () => {
       }
     `;
 
-    const res = await mutate({ mutation: DELETE_MUT });
-    expect(res.data).toEqual({
-      "delete": {
-        "id": "1",
-        "title": "Post 1"
-      }
+    describe("unauthenticated", () => {
+      beforeEach(() => {
+        reqMock = { headers: {} };
+      });
+
+      it("Throws an authorization error", async () => {
+        const res = await mutate({ mutation: DELETE_MUT });
+        expect(res).toMatchObject({
+          data: { delete: null },
+          errors: [new GraphQLError("Not Authorised!")],
+        });
+      });
+
+      it("Does not delete a post to the list", async () => {
+        await mutate({ mutation: DELETE_MUT });
+        expect(pdb.posts.length).toEqual(2);
+      });
+    });
+    describe("authenticated", () => {
+      beforeEach(() => {
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+          },
+        };
+      });
+
+      it("Deletes a post", async () => {
+        const res = await mutate({ mutation: DELETE_MUT });
+        expect(res.data).toEqual({
+          delete: {
+            id: "1",
+            title: "Post 1",
+          },
+        });
+      });
+
+      it("Deletes a post from the list", async () => {
+        await mutate({ mutation: DELETE_MUT });
+        expect(pdb.posts.length).toEqual(1);
+      });
     });
   });
 
-  it("Deletes a post from the list", async () => {
-    const DELETE_MUT = gql`
-      mutation {
-        delete(id: 1) {
-          id
-          title
-        }
-      }
-    `;
-
-    await mutate({ mutation: DELETE_MUT });
-    expect(pdb.posts.length).toEqual(1);
-  });
-
-  it("Upvotes a post", async () => {
+  describe("upvote", () => {
     const UPVOTE_MUT = gql`
-      mutation {
-        upvote(id: 1) {
-          id
-          title
-          votes
-        }
-      }
-    `;
-
-    const res = await mutate({ mutation: UPVOTE_MUT });
-    expect(res.data).toEqual({
-      upvote: {
-        id: "1",
-        title: "Post 1",
-        votes: 1,
-      },
-    });
-  });
-
-  it("Upvotes a post only once per user", async () => {
-    const UPVOTE_MUT = gql`
-      mutation {
-        upvote(id: 1) {
-          id
-          title
-          votes
-        }
-      }
-    `;
-
-    await query({ query: UPVOTE_MUT });
-    const res = await mutate({ mutation: UPVOTE_MUT });
-    expect(res.data).toEqual({
-      upvote: {
-        id: "1",
-        title: "Post 1",
-        votes: 1,
-      },
-    });
-  });
-
-  it("Upvotes twice with two different users", async () => {
-    const UPVOTE_MUT1 = gql`
       mutation {
         upvote(id: 1) {
           id
@@ -276,63 +266,74 @@ describe("Mutations", () => {
         }
       }
     `;
+    describe("unauthenticated", () => {
+      beforeEach(() => {
+        reqMock = { headers: {} };
+      });
 
-    await mutate({ mutation: UPVOTE_MUT1 });
-    const res = await mutate({ mutation: UPVOTE_MUT2 });
-    expect(res.data).toEqual({
-      upvote: {
-        id: "1",
-        title: "Post 1",
-        votes: 2,
-      },
+      it("Throws an authorization error", async () => {
+        const res = await mutate({ mutation: UPVOTE_MUT });
+        expect(res).toMatchObject({
+          data: { upvote: null },
+          errors: [new GraphQLError("Not Authorised!")],
+        });
+      });
+    });
+    describe("authenticated", () => {
+      beforeEach(() => {
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+          },
+        };
+      });
+
+      it("Upvotes a post", async () => {
+        const res = await mutate({ mutation: UPVOTE_MUT });
+        expect(res.data).toEqual({
+          upvote: {
+            id: "1",
+            title: "Post 1",
+            votes: 1,
+          },
+        });
+      });
+
+      it("Upvotes a post only once per user", async () => {
+        await query({ query: UPVOTE_MUT });
+        const res = await mutate({ mutation: UPVOTE_MUT });
+        expect(res.data).toEqual({
+          upvote: {
+            id: "1",
+            title: "Post 1",
+            votes: 1,
+          },
+        });
+      });
+
+      it("Upvotes twice with two different users", async () => {
+        await mutate({ mutation: UPVOTE_MUT });
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI2NzMzNH0.qMl6X1SXSD9HOVXXN-gyVStA5AphfTn_FTXU33Jd-40",
+          },
+        };
+        const res = await mutate({ mutation: UPVOTE_MUT2 });
+        expect(res.data).toEqual({
+          upvote: {
+            id: "1",
+            title: "Post 1",
+            votes: 2,
+          },
+        });
+      });
     });
   });
 
-  it("Downvotes a post", async () => {
+  describe("downvote", () => {
     const DOWNVOTE_MUT = gql`
-      mutation {
-        downvote(id: 1) {
-          id
-          title
-          votes
-        }
-      }
-    `;
-
-    const res = await mutate({ mutation: DOWNVOTE_MUT });
-    expect(res.data).toEqual({
-      downvote: {
-        id: "1",
-        title: "Post 1",
-        votes: -1,
-      },
-    });
-  });
-
-  it("Downvotes a post only once per user", async () => {
-    const DOWNVOTE_MUT = gql`
-      mutation {
-        downvote(id: 1) {
-          id
-          title
-          votes
-        }
-      }
-    `;
-
-    await query({ query: DOWNVOTE_MUT });
-    const res = await mutate({ mutation: DOWNVOTE_MUT });
-    expect(res.data).toEqual({
-      downvote: {
-        id: "1",
-        title: "Post 1",
-        votes: -1,
-      },
-    });
-  });
-
-  it("Downvotes twice with two different users", async () => {
-    const DOWNVOTE_MUT1 = gql`
       mutation {
         downvote(id: 1) {
           id
@@ -351,15 +352,102 @@ describe("Mutations", () => {
       }
     `;
 
-    await mutate({ mutation: DOWNVOTE_MUT1 });
-    const res = await mutate({ mutation: DOWNVOTE_MUT2 });
-    expect(res.data).toEqual({
-      downvote: {
-        id: "1",
-        title: "Post 1",
-        votes: -2,
-      },
+    describe("unauthenticated", () => {
+      beforeEach(() => {
+        reqMock = { headers: {} };
+      });
     });
+    describe("authenticated", () => {
+      beforeEach(() => {
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYwNzI2NjQ5N30.Pdb064_Gu6LNtrK7d7wtZeccV_vOVm8zeCvUJJWP_OA",
+          },
+        };
+      });
+
+      it("Downvotes a post", async () => {
+        const res = await mutate({ mutation: DOWNVOTE_MUT });
+        expect(res.data).toEqual({
+          downvote: {
+            id: "1",
+            title: "Post 1",
+            votes: -1,
+          },
+        });
+      });
+
+      it("Downvotes a post only once per user", async () => {
+        await query({ query: DOWNVOTE_MUT });
+        const res = await mutate({ mutation: DOWNVOTE_MUT });
+        expect(res.data).toEqual({
+          downvote: {
+            id: "1",
+            title: "Post 1",
+            votes: -1,
+          },
+        });
+      });
+
+      it("Downvotes twice with two different users", async () => {
+        await mutate({ mutation: DOWNVOTE_MUT });
+        reqMock = {
+          headers: {
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTYwNzI2NzMzNH0.qMl6X1SXSD9HOVXXN-gyVStA5AphfTn_FTXU33Jd-40",
+          },
+        };
+        const res = await mutate({ mutation: DOWNVOTE_MUT2 });
+        expect(res.data).toEqual({
+          downvote: {
+            id: "1",
+            title: "Post 1",
+            votes: -2,
+          },
+        });
+      });
+    });
+  });
+
+  describe("signup", () => {
+    const SIGNUP_MUT = 'mutation {signup(name:"Peter" email:"mail@mail.de" password:"password")}';
+    it("Signs a new user up and returns JWT Token", async () => {
+      const res = await mutate({ mutation: SIGNUP_MUT });
+      expect(res.data).toMatchObject({
+        signup: expect.any(String)
+      })
+    });
+
+    it("Tries to sign up an existing user", async () => {
+      await mutate({ mutation: SIGNUP_MUT });
+      const res = await mutate({ mutation: SIGNUP_MUT });
+      expect(res.data).toMatchObject({
+        signup: "Email already exists. User not added."
+      })
+    });
+  });
+
+  describe("login", () => {
+const CORRECT_LOGIN_MUT = 'mutation login {login(email: "Robert@hTw.de" password: "password")}';
+const FALSE_LOGIN_MUT = 'mutation login {login(email: "Robert@hTw.de" password: "garbage")}';
+
+it("Logs a user in and returns a JWT Token", async () => {
+  await mutate({ mutation: CORRECT_LOGIN_MUT });
+  const res = await mutate({ mutation: CORRECT_LOGIN_MUT });
+  expect(res.data).toMatchObject({
+    login: expect.any(String)
+  })
+});
+
+it("Tries to sign up an existing user", async () => {
+  await mutate({ mutation: FALSE_LOGIN_MUT });
+  const res = await mutate({ mutation: FALSE_LOGIN_MUT });
+  expect(res.data).toMatchObject({
+    login: "User or Password incorrect"
+  })
+});
+
   });
 });
 

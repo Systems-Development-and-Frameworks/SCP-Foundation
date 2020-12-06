@@ -1,27 +1,18 @@
-import jwt from "jsonwebtoken"
-import { privateKey } from "../private.key"
-
 const { rule, shield, allow } = require("graphql-shield");
 
 const isAuthenticatedUser = rule({cache: 'contextual'})(
   async (parent, args, context) => {
-    const jwtoken = context.req.headers.authorization.replace('Bearer ', '')
-    let userData
-
-    try {
-        userData = jwt.verify(jwtoken, privateKey)
-    } catch (e) {
-        console.log(e)
-        return false;
-    }
+    let userData = context.userData
 
     if (context.dataSources.udb.userExists(userData.userId)){
+      console.log("User does exist.")
       context.currentUser = userData.userId
       return true
+    }else {
+      console.log("User does not exist.")
+      return false
     }
-
-    console.log("User does not exist.")
-    return false
+    
 })
 
 export const permissions = shield({
