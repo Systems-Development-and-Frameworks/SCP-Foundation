@@ -7,7 +7,7 @@
     "dev": "nodemon -r esm ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src/**/*.js",
-    "test:unit": "set NODE_ENV=test & jest"
+    "test:unit": "cross-env NODE_ENV=test & jest"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +29,7 @@
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^7.13.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.6"
