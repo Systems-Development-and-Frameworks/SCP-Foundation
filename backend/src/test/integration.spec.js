@@ -215,7 +215,7 @@ describe("Mutations", () => {
         });
       });
 
-      it("Does not delete a post to the list", async () => {
+      it("Does not delete a post from the list", async () => {
         await mutate({ mutation: DELETE_MUT });
         expect(pdb.posts.length).toEqual(2);
       });
@@ -269,7 +269,14 @@ describe("Mutations", () => {
           errors: [new GraphQLError("Not Authorised!")],
         });
       });
+
+      it("Does not upvote a post", async () => {
+        let allVotes = pdb.allPosts().map(element => pdb.getVotes(element.id));
+        await mutate({ mutation: UPVOTE_MUT });
+        expect(pdb.allPosts().map(element => pdb.getVotes(element.id))).toEqual(allVotes);
+      });
     });
+
     describe("authenticated", () => {
       beforeEach(() => {
         reqMock = {
