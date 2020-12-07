@@ -7,7 +7,7 @@
     "dev": "nodemon -r esm ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src/**/*.js",
-    "test:unit": "NODE_ENV=test jest"
+    "test:unit": "set NODE_ENV=test & jest"
   },
   "keywords": [],
   "author": "",
