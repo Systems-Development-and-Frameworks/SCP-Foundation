@@ -345,7 +345,22 @@ describe("Mutations", () => {
       beforeEach(() => {
         reqMock = { headers: {} };
       });
+
+      it("Throws an authorization error", async () => {
+        const res = await mutate({ mutation: DOWNVOTE_MUT });
+        expect(res).toMatchObject({
+          data: { downvote: null },
+          errors: [new GraphQLError("Not Authorised!")],
+        });
+      });
+
+      it("Does not downvote a post", async () => {
+        let allVotes = pdb.allPosts().map(element => pdb.getVotes(element.id));
+        await mutate({ mutation: DOWNVOTE_MUT });
+        expect(pdb.allPosts().map(element => pdb.getVotes(element.id))).toEqual(allVotes);
+      });
     });
+
     describe("authenticated", () => {
       beforeEach(() => {
         reqMock = {
