@@ -1,10 +1,11 @@
   export const resolvers = {
     Query: {
-      posts: (parent, args, context) => context.dataSources.pdb.allPosts(),
+      posts: (parent, args, context) => context.dataSources.pdb.getPosts(),
       users: (parent, args, context) => context.dataSources.udb.allUsers()
     },
     Mutation: {
-      write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, context.currentUser),
+      write: (parent, args, context) => context.dataSources.pdb.writePosts(),
+      //write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, context.currentUser),
       upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, 1),
       downvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, -1),
       delete: (parent, args, context) => context.dataSources.pdb.deletePost(args.id),

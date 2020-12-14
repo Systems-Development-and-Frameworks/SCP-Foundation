@@ -25,7 +25,8 @@ export default class Server {
 
     return new ApolloServer({
       ...defaults,
-      ...applyMiddleware(schema, permissions),
+      //...applyMiddleware(schema, permissions),
+      schema,
       ...opts,
     });
   }
