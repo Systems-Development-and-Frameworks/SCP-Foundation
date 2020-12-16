@@ -1,5 +1,12 @@
   export const resolvers = {
     Query: {
+      allposts: (parent, args, context, info) => delegateToSchema({
+        schema: subschema,
+        operation: 'query',
+        fieldName: 'person',
+        context,
+        info,
+      }),
       posts: (parent, args, context) => context.dataSources.pdb.getPosts(),
       users: (parent, args, context) => context.dataSources.udb.allUsers()
     },

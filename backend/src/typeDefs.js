@@ -17,6 +17,7 @@ type User {
 }
 
 type Query {
+  allposts: [Post]
   posts: [Post]
   users: [User]
 }
