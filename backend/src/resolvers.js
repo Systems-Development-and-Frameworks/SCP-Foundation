@@ -1,6 +1,7 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
+import { gql } from 'apollo-server'
   
-  export default ({ schema }) => ({
+  export default ({ schema, executor }) => ({
     Query: {
       posts: (parent, args, context, info) => delegateToSchema({
         schema,
@@ -35,8 +36,36 @@ import { delegateToSchema } from '@graphql-tools/delegate'
         context,
         info
       }),
+      signup: async (parent, args, context, info) => {
+        const getEmailQuery = gql`
+        query {
+          people (where: {email: "${args.email}"}) {
+            email
+          }
+        }
+        `;
+        const { data, errors } = await executor({ document: getEmailQuery })
+        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
+        const { people } = data
+        if (people.length > 0) return "Email already signed up.";
 
-      //write: (parent, args, context) => context.dataSources.pdb.createPost(args.post.title, context.currentUser),
+        const passwordHash = await context.dataSources.udbg.validateAndHashPassword(args.password)
+
+        if (!passwordHash) return "Password invalid. Choose another password."
+
+        const createUser = gql`
+        mutation {
+          createPerson(data: {name: "${args.name}", email: "${args.email}", password: "${passwordHash}"}) {
+            id
+          }
+        }
+        `;
+        const response = await executor({ document: createUser })
+        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+
+        return context.dataSources.udbg.createJWT(response.data.createPerson.id)
+      },
+
       // upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, 1),
       // downvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, -1),
       // signup: (parent, args, context) => context.dataSources.udb.signup(args.name, args.email, args.password),

@@ -1,17 +1,20 @@
 import { ApolloServer } from "apollo-server";
-import { UserDatasource } from "./datasource/user-datasource.js";
+import { UserDatasource } from "./datasource/user-datasource";
+import { UserDatasourceGraphCms } from "./datasource/user-datasource-graphcms";
 import { PostDatasource } from "./datasource/post-datasource";
 import { context } from "./context"
 import Schema from "./schema"
 
 const udb = new UserDatasource();
+const udbg = new UserDatasourceGraphCms();
 const pdb = new PostDatasource(udb);
 
-const dataSources = () => ({ udb, pdb });
+const dataSources = () => ({ udb, udbg, pdb });
 
 export default async (opts) => {
   const defaults = {
     UserDatasource,
+    UserDatasourceGraphCms,
     PostDatasource,
     context,
     dataSources,

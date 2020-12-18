@@ -3,7 +3,7 @@ import { introspectSchema, wrapSchema } from '@graphql-tools/wrap';
 import { print } from 'graphql';
 import { graphCmsApiToken, graphCmsEndpoint } from '../config';
 
-const executor = async ({ document, variables }) => {
+export const executor = async ({ document, variables }) => {
   const query = print(document);
   const headers = { 'Content-Type': 'application/json' };
   if (graphCmsApiToken) headers.Authorization = `Bearer ${graphCmsApiToken}`;
