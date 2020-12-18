@@ -24,7 +24,7 @@ type Query {
 }
 
 type Mutation {
-  write(post: PostInput!): Post
+  write(data: PostInput!): Post
   delete(id: ID!): Post
 
   upvote(id: ID!): Post

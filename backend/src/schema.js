@@ -17,6 +17,7 @@ export default async () => {
     resolvers,
   });
 
-  gatewaySchema = applyMiddleware(gatewaySchema, permissions);
+  // TODO: add permissions
+  gatewaySchema = applyMiddleware(gatewaySchema);//, permissions);
   return gatewaySchema;
 };
