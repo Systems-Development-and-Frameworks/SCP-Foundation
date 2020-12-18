@@ -1,13 +1,26 @@
-  export const resolvers = {
+import { delegateToSchema } from '@graphql-tools/delegate'
+  
+  export default ({ schema }) => ({
     Query: {
-      allposts: (parent, args, context, info) => delegateToSchema({
-        schema: subschema,
+      posts: (parent, args, context, info) => delegateToSchema({
+        schema,
         operation: 'query',
-        fieldName: 'person',
+        fieldName: 'posts',
+        args: {
+        },
         context,
         info,
       }),
-      posts: (parent, args, context) => context.dataSources.pdb.getPosts(),
+      people: (parent, args, context, info) => delegateToSchema({
+        schema,
+        operation: 'query',
+        fieldName: 'people',
+        args: {
+        },
+        context,
+        info,
+      }),
+      allposts: (parent, args, context) => context.dataSources.pdb.getPosts(),
       users: (parent, args, context) => context.dataSources.udb.allUsers()
     },
     Mutation: {
@@ -26,5 +39,4 @@
     User: {
       posts: (parent, args, context) => context.dataSources.pdb.getAllPostsFromUser(parent.id)
     }
-  };
-  
+  });

@@ -9,28 +9,18 @@ const pdb = new PostDatasource(udb);
 
 const dataSources = () => ({ udb, pdb });
 
-export default class Server {
-  constructor(opts) {
-    //const schema = makeExecutableSchema({ typeDefs, resolvers });
-    const defaults = {
-      UserDatasource,
-      PostDatasource,
-      context,
-      dataSources,
-    };
-
-    // TODO: find workaround for await
-    const schema = await Schema()
-    return new ApolloServer({
-      ...defaults,
-      schema,
-      ...opts,
-    });
-  }
-}
-
-// export default async (ApolloServer, opts) => {
-//   const schema = await Schema();
-//   const server = new ApolloServer({ schema, context, ...opts });
-//   return server;
-// };
+export default async (opts) => {
+  const defaults = {
+    UserDatasource,
+    PostDatasource,
+    context,
+    dataSources,
+  };
+  
+  const schema = await Schema();
+  const server = new ApolloServer({
+    ...defaults,
+    schema, 
+    ...opts });
+  return server;
+};

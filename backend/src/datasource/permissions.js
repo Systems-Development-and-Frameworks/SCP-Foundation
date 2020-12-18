@@ -18,6 +18,7 @@ export const permissions = shield({
   Query: {
     users: allow,
     posts: allow,
+    allposts: allow,
   },
   Mutation: {
     write: isAuthenticatedUser,
