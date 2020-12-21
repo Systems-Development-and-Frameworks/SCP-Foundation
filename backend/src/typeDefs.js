@@ -26,9 +26,7 @@ type Query {
 type Mutation {
   write(data: PostInput!): Post
   delete(id: ID!): Post
-
-  upvote(id: ID!): Post
-  downvote(id: ID!): Post
+  vote(postId: ID!, voteValue: Int!): String
 
   """
   returns a signed JWT or null

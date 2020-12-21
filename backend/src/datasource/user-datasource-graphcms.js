@@ -1,4 +1,3 @@
-import User from "../classes/user";
 import jwt from "jsonwebtoken";
 import { privateKey } from "../config";
 import bcrypt from "bcrypt";
