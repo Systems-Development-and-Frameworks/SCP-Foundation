@@ -25,4 +25,14 @@ export class UserDatasourceGraphCms extends DataSource {
     }
     return undefined;
   }
+
+  async checkPassword(userId, plainPassword, hashedPassword) {
+    return await bcrypt.compare(plainPassword, hashedPassword)
+      .then(res => {
+          return res ? this.createJWT(userId) : "User or Password incorrect"
+      }).catch(err => {
+          console.log("CheckPassword Error:", err.message)
+          return "User or Password incorrect"
+      })
+  }
 }

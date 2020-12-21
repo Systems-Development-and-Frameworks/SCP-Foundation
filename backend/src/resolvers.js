@@ -36,7 +36,7 @@ import { gql } from 'apollo-server'
         context,
         info
       }),
-      signup: async (parent, args, context, info) => {
+      signup: async (parent, args, context) => {
         const getEmailQuery = gql`
         query {
           people (where: {email: "${args.email}"}) {
@@ -65,11 +65,26 @@ import { gql } from 'apollo-server'
 
         return context.dataSources.udbg.createJWT(response.data.createPerson.id)
       },
+      login: async (parent, args, context) => {
+        const getEmailQuery = gql`
+        query {
+          people (where: {email: "${args.email}"}) {
+            id
+            email
+            password
+          }
+        }
+        `;
+        const { data, errors } = await executor({ document: getEmailQuery })
+        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
+        const { people } = data
+        if (people.length != 1) return "Email or Password incorrect.";
+
+        return context.dataSources.udbg.checkPassword(people[0].id, args.password, people[0].password)
+      }
 
       // upvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, 1),
       // downvote: (parent, args, context) => context.dataSources.pdb.votePost(args.id, context.currentUser, -1),
-      // signup: (parent, args, context) => context.dataSources.udb.signup(args.name, args.email, args.password),
-      // login: (parent, args, context) => context.dataSources.udb.login(args.email, args.password),
     },
     Post:{
       author: (parent, args, context) => context.dataSources.udb.getUserById(parent.user_id),
