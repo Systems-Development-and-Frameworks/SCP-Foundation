@@ -19,13 +19,27 @@ import { gql } from 'apollo-server'
       })
     },
     Mutation: {
-      write: (parent, args, context, info) => delegateToSchema({
-        schema,
-        operation: 'mutation',
-        fieldName: 'createPost',
-        context,
-        info
-      }),
+      write: async (parent, args, context, info) => {
+        const createPostMutation = gql`
+        mutation {
+          createPost(data: {title: "${args.data.title}", author: {connect: {id: "${context.userData.userId}"}}}) {
+            id
+            title
+            text
+            votes {
+              value
+            }
+            author {
+              name
+            }
+          }
+        }
+        `;
+        const { data, errors } = await executor({ document: createPostMutation })
+        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
+        
+        return data.createPost
+      },
       delete: (parent, args, context, info) => delegateToSchema({
         schema,
         operation: 'mutation',
@@ -82,7 +96,7 @@ import { gql } from 'apollo-server'
 
         return context.dataSources.udbg.checkPassword(people[0].id, args.password, people[0].password)
       },
-      vote: async (parent, args, context) => {
+      vote: async (parent, args, context, info) => {
         // get all votes of postId
         const getVotes = gql`
         query {
@@ -141,17 +155,95 @@ import { gql } from 'apollo-server'
           }
         }
 
-        const response = await executor({ document: voteMutation })
+        let response = await executor({ document: voteMutation })
         if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
 
-        return JSON.stringify(response.data)
+        const postQuery = gql`
+        query {
+          post (where: {id: "${args.postId}"}) {
+            id
+            title
+            text
+            votes {
+              id
+            }
+            author {
+              id
+            }
+          }
+        }
+        `;
+
+        response = await executor({ document: postQuery })
+        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+
+        return response.data.post
       }
     },
     Post:{
-      author: (parent, args, context) => context.dataSources.udb.getUserById(parent.user_id),
-      votes: (parent, args, context) => context.dataSources.pdb.getVotes(parent.id)
+      author: async (parent, args, context) => {
+        const authorQuery = gql`
+        query {
+          person (where: {id: "${parent.author.id}"}) {
+            id
+            name
+            email
+            posts {
+              id
+            }
+          }
+        }
+        `;
+
+        const response = await executor({ document: authorQuery })
+        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+
+        return response.data.person
+      },
+      votes: async (parent, args, context) => {
+        let votesCounter = 0
+        let voteValueQuery = gql`
+        query {
+          votes (where: {post: {id:"${parent.id}"}}) {
+            value
+          }
+        }
+        `;
+        const response = await executor({ document: voteValueQuery })
+        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+
+        console.log("response.data", response.data)
+        if (response.data.votes) {
+          response.data.votes.forEach(vote => {
+            votesCounter += vote.value
+          });
+        }
+
+        return votesCounter
+      },
     },
     User: {
-      posts: (parent, args, context) => context.dataSources.pdb.getAllPostsFromUser(parent.id)
+      posts: async (parent, args, context) => {
+        const postQuery = gql`
+        query {
+          posts (where: {author: {id: "${parent.id}"}}) {
+            id
+            title
+            text
+            author {
+              id
+            }
+            votes {
+              id
+            }
+          }
+        }
+        `;
+
+        const response = await executor({ document: postQuery })
+        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+
+        return response.data.posts
+      }
     }
   });
