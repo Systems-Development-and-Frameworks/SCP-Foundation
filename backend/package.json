@@ -7,7 +7,7 @@
     "dev": "nodemon -r esm ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src/**/*.js",
-    "test:unit": "jest"
+    "test:unit": "cross-env NODE_ENV=test & jest"
   },
   "keywords": [],
   "author": "",
@@ -19,10 +19,17 @@
     "apollo-server": "^2.19.0",
     "apollo-server-testing": "^2.19.0",
     "babel-jest": "^26.6.3",
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "dotenv-flow": "^3.2.0",
     "esm": "^3.2.25",
-    "graphql": "^15.4.0"
+    "graphql": "^15.4.0",
+    "graphql-middleware": "^4.0.2",
+    "graphql-shield": "^7.4.2",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^7.13.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.6"

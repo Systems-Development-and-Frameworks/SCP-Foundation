@@ -9,12 +9,24 @@ at `Hochschule für Technik und Wirtschaft` in Berlin.
 
 ## How to use
 
-You need NodeJS, NPM, VueJS installed on your computer.
+You need NodeJS, NPM, VueJS installed on your computer. To run the application, clone the repository.
 
-1. To run the application, clone the repository and navigate to `./webapp/sdf/`.
+### Webapp
+
+1. Navigate to `./webapp/`.
 2. Run `npm install`.
 3. Run `npm run serve` to start the application server.
 4. Open `localhost:8080` in your web browser to view the application.
+
+### Backend
+
+1. Navigate to `./backend/`.
+2. Create a `.env`file
+3. Add a JWT Secret similar to this `JWT_SECRET = Your_Secret`
+4. Save the `.env`file
+5. Run `npm install`.
+6. Run `npm run dev` to start the application server.
+7. Open `localhost:4000` in your web browser to view the application.
 
 ## Contributors
 
