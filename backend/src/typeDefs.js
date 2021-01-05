@@ -6,10 +6,10 @@ type Post {
   id: ID!
   title: String!
   votes: Int!
-  author: User!
+  author: Person!
 }
 
-type User {
+type Person {
   id: ID!
   name: String!
   email: String!
@@ -17,7 +17,7 @@ type User {
 }
 
 type Query {
-  people: [User]
+  people: [Person]
   posts: [Post]
 }
 

@@ -223,7 +223,7 @@ import { gql } from 'apollo-server'
         return votesCounter
       },
     },
-    User: {
+    Person: {
       posts: async (parent, args, context) => {
         const postQuery = gql`
         query {
