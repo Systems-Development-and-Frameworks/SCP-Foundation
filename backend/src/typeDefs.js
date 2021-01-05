@@ -17,10 +17,8 @@ type User {
 }
 
 type Query {
-  allposts: [Post]
   people: [User]
   posts: [Post]
-  users: [User]
 }
 
 type Mutation {

@@ -97,6 +97,8 @@ import { gql } from 'apollo-server'
         return context.dataSources.udbg.checkPassword(people[0].id, args.password, people[0].password)
       },
       vote: async (parent, args, context, info) => {
+        if (args.voteValue != 1 && args.voteValue != -1) throw new Error("Invalid vote value.")
+
         // get all votes of postId
         const getVotes = gql`
         query {
@@ -212,7 +214,6 @@ import { gql } from 'apollo-server'
         const response = await executor({ document: voteValueQuery })
         if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
 
-        console.log("response.data", response.data)
         if (response.data.votes) {
           response.data.votes.forEach(vote => {
             votesCounter += vote.value

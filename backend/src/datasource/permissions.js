@@ -16,9 +16,8 @@ const isAuthenticatedUser = rule({cache: 'contextual'})(
 
 export const permissions = shield({
   Query: {
-    users: allow,
+    people: allow,
     posts: allow,
-    allposts: allow,
   },
   Mutation: {
     write: isAuthenticatedUser,
