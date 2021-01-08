@@ -19,7 +19,6 @@ export default ({ schema, executor }) => ({
       `;
       const { data, errors } = await executor({ document: postsQuery });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
-      console.log("People Query", data);
       return data.posts;
     },
     people: async (parent, args, context, info) => {

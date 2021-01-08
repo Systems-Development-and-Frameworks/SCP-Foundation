@@ -1,60 +1,97 @@
-import { createTestClient } from 'apollo-server-testing'
-import { ApolloServer, gql } from 'apollo-server'
-import Server from './server'
+import { createTestClient } from "apollo-server-testing";
+import { ApolloServer, gql } from "apollo-server";
+import Server from "./server";
 
-jest.mock('./graphCms/schema')
+jest.mock("./graphCms/schema");
 
-const mocks = {
-    Int: () => 6,
-    Float: () => 22.1,
-    String: () => 'Hello',
-    Post: () => ({
-      id: "post id",
-      title: "title"
-    }),
-    Person: () => ({
-      name:'Günther',
-      id: "",
-      email:"günther.jauch@aol.de"
-    })
-    };
-
-let query
-let contextMock = () => context({ req: { headers: {} }, res: {} })
+let reqMock;
+let resMock;
+let query;
+let mutate;
+let contextMock = () => context({ req: reqMock, res: resMock });
 
 beforeEach(async () => {
-    let contextMock = () => {}
-    const server = await Server({ context: () => contextMock, mocks })
-    const response = createTestClient(server)
-    query = response.query
-    console.log(query)
-})
+  let contextMock = () => {};
+  const server = await Server({ context: () => contextMock });
+  const response = createTestClient(server);
+  query = response.query;
+  mutate = response.mutate;
+});
 
-describe('Testing queries on GraphCMS', () => {
-
-    describe('query: people', () => {
-
-        const PEOPLE = gql`
-        query{
-            posts {
-                id
-                title
-                author{
-                    id
-                    name
-                }
+describe("Testing queries on GraphCMS", () => {
+  beforeEach(async () => {
+    reqMock = { headers: {} };
+    resMock = {};
+  });
+  describe("Person", () => {
+    describe("Returns all properties of Person", () => {
+      const personQuery = gql`
+        query {
+          posts {
+            title
+            id
+            voteResult
+            author {
+              id
+              name
             }
+          }
         }
-        `
-    
-        it('returns array of people', async () => {
-            let res = await query({ query: PEOPLE })
-            console.log(res)
-    
-            expect(res.data).toEqual({
-                person: { id : expect.any(String), name: "Hello World" },
-            })
-        }
-        )
-    })}
-)
+      `;
+
+      it("returns array of people", async () => {
+        let res = await query({ query: personQuery });
+
+        expect(res.data).toEqual({
+          posts: [
+            {
+              id: expect.any(String),
+              title: expect.any(String),
+              voteResult: expect.any(Number),
+              author: {
+                id: expect.any(String),
+                name: expect.any(String),
+              },
+            },
+            {
+              id: expect.any(String),
+              title: expect.any(String),
+              voteResult: expect.any(Number),
+              author: {
+                id: expect.any(String),
+                name: expect.any(String),
+              },
+            },
+          ],
+        });
+      });
+    });
+  });
+});
+
+describe("Mutations", () => {
+    //TODO: NOT functional yet
+  describe("Signup", () => {
+    const signupMut = gql`
+      mutation {
+        signup(name: "Peter", email: "mail@mail.de", password: "password")
+      }
+    `;
+    it("signs someone up", async () => {
+        let res = await mutate({ mutation: signupMut });
+        console.log(res);
+        expect(res.data).toEqual({})
+    });
+  });
+  //TODO: NOT functional yet
+  describe("Login", () => {
+    const loginMut = gql`
+    mutation login {login(email: "günther.jauch@aol.de" password: "password")}
+    `;
+    it("signs someone up", async () => {
+        let res = await mutate({ mutation: loginMut });
+        console.log(res);
+        expect(res.data).toEqual({})
+    });
+  });
+});
