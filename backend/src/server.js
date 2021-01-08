@@ -10,16 +10,6 @@ const udbg = new UserDatasourceGraphCms();
 const pdb = new PostDatasource(udb);
 
 const dataSources = () => ({ udb, udbg, pdb });
-const mocks = {
-  Int: () => 6,
-  Float: () => 22.1,
-  String: () => 'Hello',
-  Person: () => ({
-    name:'Günther',
-    id: "",
-    email:"günther.jauch@aol.de"
-  })
-  };
 
 export default async (opts) => {
   const defaults = {
@@ -34,7 +24,6 @@ export default async (opts) => {
   const server = new ApolloServer({
     ...defaults,
     schema, 
-    mocks,
     ...opts });
   return server;
 };
