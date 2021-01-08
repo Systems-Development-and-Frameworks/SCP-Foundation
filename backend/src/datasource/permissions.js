@@ -4,7 +4,7 @@ const isAuthenticatedUser = rule({cache: 'contextual'})(
   async (parent, args, context) => {
     let userData = context.userData
 
-    if (context.dataSources.udb.userExists(userData.userId)){
+    if (context.dataSources.udbg.userExists(userData.userId)){
       context.currentUser = userData.userId
       return true
     }else {
@@ -21,8 +21,7 @@ export const permissions = shield({
   },
   Mutation: {
     write: isAuthenticatedUser,
-    upvote: isAuthenticatedUser,
-    downvote: isAuthenticatedUser,
+    vote: isAuthenticatedUser,
     delete: isAuthenticatedUser,
   }
 });

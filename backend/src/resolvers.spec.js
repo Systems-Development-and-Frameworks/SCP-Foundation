@@ -41,7 +41,7 @@ describe("Testing queries on GraphCMS", () => {
 
       it("returns array of people", async () => {
         let res = await query({ query: personQuery });
-
+        console.log(res.data)
         expect(res.data).toEqual({
           posts: [
             {

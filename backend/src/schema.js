@@ -18,6 +18,6 @@ export default async () => {
   });
 
   // TODO: add permissions
-  gatewaySchema = applyMiddleware(gatewaySchema);//, permissions);
+  gatewaySchema = applyMiddleware(gatewaySchema, permissions);
   return gatewaySchema;
 };
