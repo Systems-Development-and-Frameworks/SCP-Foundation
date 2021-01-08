@@ -21,15 +21,16 @@ describe('Testing queries on GraphCMS', () => {
 
         const PEOPLE = gql`
         {
-            person (where: {}){
+            post (where: {}){
                 id
-                name
+                title
             }
         }
         `
     
         it('returns array of people', async () => {
             let res = await query({ query: PEOPLE })
+            console.log(res)
     
             expect(res.data).toEqual({
                 person: { id : expect.any(String), name: "Hello World" },

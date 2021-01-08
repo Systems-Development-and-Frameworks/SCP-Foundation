@@ -129,6 +129,14 @@ directive @mark(
   storageId: String
 ) on OBJECT | FIELD_DEFINITION | ENUM_VALUE | ENUM | INPUT_FIELD_DEFINITION | INPUT_OBJECT | ARGUMENT_DEFINITION
 
+directive @permission(
+  """Policy resource names."""
+  resources: [String!]
+
+  """Policy action names."""
+  actions: [String!]
+) on FIELD_DEFINITION
+
 directive @psql(
   """postgres table name"""
   table: String
@@ -175,14 +183,6 @@ directive @remote(
   list of field storage ids that will available for templates and parameters for the remote call
   """
   payloadFields: [String!]!
-) on FIELD_DEFINITION
-
-directive @permission(
-  """Policy resource names."""
-  resources: [String!]
-
-  """Policy action names."""
-  actions: [String!]
 ) on FIELD_DEFINITION
 
 enum _FilterKind {
@@ -1560,6 +1560,137 @@ type Mutation {
     """Stages to unpublish documents from"""
     from: [Stage!]! = [PUBLISHED]
   ): BatchPayload! @deprecated(reason: "Please use the new paginated many mutation (unpublishManyPostsConnection)")
+
+  """Create one vote"""
+  createVote(data: VoteCreateInput!): Vote
+
+  """Update one vote"""
+  updateVote(where: VoteWhereUniqueInput!, data: VoteUpdateInput!): Vote
+
+  """Delete one vote from _all_ existing stages. Returns deleted document."""
+  deleteVote(
+    """Document to delete"""
+    where: VoteWhereUniqueInput!
+  ): Vote
+
+  """Upsert one vote"""
+  upsertVote(where: VoteWhereUniqueInput!, upsert: VoteUpsertInput!): Vote
+
+  """Publish one vote"""
+  publishVote(
+    """Document to publish"""
+    where: VoteWhereUniqueInput!
+
+    """Publishing target stage"""
+    to: [Stage!]! = [PUBLISHED]
+  ): Vote
+
+  """
+  Unpublish one vote from selected stages. Unpublish either the complete
+  document with its relations, localizations and base data or specific
+  localizations only.
+  """
+  unpublishVote(
+    """Document to unpublish"""
+    where: VoteWhereUniqueInput!
+
+    """Stages to unpublish document from"""
+    from: [Stage!]! = [PUBLISHED]
+  ): Vote
+
+  """Update many Vote documents"""
+  updateManyVotesConnection(
+    """Documents to apply update on"""
+    where: VoteManyWhereInput
+
+    """Updates to document content"""
+    data: VoteUpdateManyInput!
+    skip: Int
+    first: Int
+    last: Int
+    before: ID
+    after: ID
+  ): VoteConnection!
+
+  """Delete many Vote documents, return deleted documents"""
+  deleteManyVotesConnection(
+    """Documents to delete"""
+    where: VoteManyWhereInput
+    skip: Int
+    first: Int
+    last: Int
+    before: ID
+    after: ID
+  ): VoteConnection!
+
+  """Publish many Vote documents"""
+  publishManyVotesConnection(
+    """Identifies documents in each stage to be published"""
+    where: VoteManyWhereInput
+
+    """Stage to find matching documents in"""
+    from: Stage = DRAFT
+
+    """Stages to publish documents to"""
+    to: [Stage!]! = [PUBLISHED]
+    skip: Int
+    first: Int
+    last: Int
+    before: ID
+    after: ID
+  ): VoteConnection!
+
+  """
+  Find many Vote documents that match criteria in specified stage and unpublish from target stages
+  """
+  unpublishManyVotesConnection(
+    """Identifies documents in draft stage"""
+    where: VoteManyWhereInput
+
+    """Stage to find matching documents in"""
+    stage: Stage = DRAFT
+
+    """Stages to unpublish documents from"""
+    from: [Stage!]! = [PUBLISHED]
+    skip: Int
+    first: Int
+    last: Int
+    before: ID
+    after: ID
+  ): VoteConnection!
+
+  """Update many votes"""
+  updateManyVotes(
+    """Documents to apply update on"""
+    where: VoteManyWhereInput
+
+    """Updates to document content"""
+    data: VoteUpdateManyInput!
+  ): BatchPayload! @deprecated(reason: "Please use the new paginated many mutation (updateManyVotesConnection)")
+
+  """Delete many Vote documents"""
+  deleteManyVotes(
+    """Documents to delete"""
+    where: VoteManyWhereInput
+  ): BatchPayload! @deprecated(reason: "Please use the new paginated many mutation (deleteManyVotesConnection)")
+
+  """Publish many Vote documents"""
+  publishManyVotes(
+    """Identifies documents in each stage to be published"""
+    where: VoteManyWhereInput
+
+    """Stages to publish documents to"""
+    to: [Stage!]! = [PUBLISHED]
+  ): BatchPayload! @deprecated(reason: "Please use the new paginated many mutation (publishManyVotesConnection)")
+
+  """Unpublish many Vote documents"""
+  unpublishManyVotes(
+    """Identifies documents in each stage"""
+    where: VoteManyWhereInput
+
+    """Stages to unpublish documents from"""
+    from: [Stage!]! = [PUBLISHED]
+  ): BatchPayload! @deprecated(reason: "Please use the new paginated many mutation (unpublishManyVotesConnection)")
 }
 
 """An object with an ID"""
@@ -1642,6 +1773,31 @@ type Person implements Node {
     """
     locales: [Locale!]
   ): [Post!]!
+  email: String!
+  password: String!
+  votes(
+    where: VoteWhereInput
+    orderBy: VoteOrderByInput
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+
+    """
+    Allows to optionally override locale filtering behaviour in the query's subtree.
+    
+    Note that `votes` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument will overwrite any existing locale filtering defined in the query's tree for the subtree.
+    """
+    locales: [Locale!]
+  ): [Vote!]!
 
   """List of Person versions"""
   history(
@@ -1680,6 +1836,9 @@ input PersonCreateInput {
   updatedAt: DateTime
   name: String!
   posts: PostCreateManyInlineInput
+  email: String!
+  password: String!
+  votes: VoteCreateManyInlineInput
 }
 
 input PersonCreateManyInlineInput {
@@ -1845,6 +2004,65 @@ input PersonManyWhereInput {
   posts_every: PostWhereInput
   posts_some: PostWhereInput
   posts_none: PostWhereInput
+  email: String
+
+  """All values that are not equal to given value."""
+  email_not: String
+
+  """All values that are contained in given list."""
+  email_in: [String!]
+
+  """All values that are not contained in given list."""
+  email_not_in: [String!]
+
+  """All values containing the given string."""
+  email_contains: String
+
+  """All values not containing the given string."""
+  email_not_contains: String
+
+  """All values starting with the given string."""
+  email_starts_with: String
+
+  """All values not starting with the given string."""
+  email_not_starts_with: String
+
+  """All values ending with the given string."""
+  email_ends_with: String
+
+  """All values not ending with the given string"""
+  email_not_ends_with: String
+  password: String
+
+  """All values that are not equal to given value."""
+  password_not: String
+
+  """All values that are contained in given list."""
+  password_in: [String!]
+
+  """All values that are not contained in given list."""
+  password_not_in: [String!]
+
+  """All values containing the given string."""
+  password_contains: String
+
+  """All values not containing the given string."""
+  password_not_contains: String
+
+  """All values starting with the given string."""
+  password_starts_with: String
+
+  """All values not starting with the given string."""
+  password_not_starts_with: String
+
+  """All values ending with the given string."""
+  password_ends_with: String
+
+  """All values not ending with the given string"""
+  password_not_ends_with: String
+  votes_every: VoteWhereInput
+  votes_some: VoteWhereInput
+  votes_none: VoteWhereInput
 }
 
 enum PersonOrderByInput {
@@ -1858,11 +2076,18 @@ enum PersonOrderByInput {
   publishedAt_DESC
   name_ASC
   name_DESC
+  email_ASC
+  email_DESC
+  password_ASC
+  password_DESC
 }
 
 input PersonUpdateInput {
   name: String
   posts: PostUpdateManyInlineInput
+  email: String
+  password: String
+  votes: VoteUpdateManyInlineInput
 }
 
 input PersonUpdateManyInlineInput {
@@ -1892,6 +2117,7 @@ input PersonUpdateManyInlineInput {
 
 input PersonUpdateManyInput {
   name: String
+  password: String
 }
 
 input PersonUpdateManyWithNestedWhereInput {
@@ -2084,11 +2310,71 @@ input PersonWhereInput {
   posts_every: PostWhereInput
   posts_some: PostWhereInput
   posts_none: PostWhereInput
+  email: String
+
+  """All values that are not equal to given value."""
+  email_not: String
+
+  """All values that are contained in given list."""
+  email_in: [String!]
+
+  """All values that are not contained in given list."""
+  email_not_in: [String!]
+
+  """All values containing the given string."""
+  email_contains: String
+
+  """All values not containing the given string."""
+  email_not_contains: String
+
+  """All values starting with the given string."""
+  email_starts_with: String
+
+  """All values not starting with the given string."""
+  email_not_starts_with: String
+
+  """All values ending with the given string."""
+  email_ends_with: String
+
+  """All values not ending with the given string"""
+  email_not_ends_with: String
+  password: String
+
+  """All values that are not equal to given value."""
+  password_not: String
+
+  """All values that are contained in given list."""
+  password_in: [String!]
+
+  """All values that are not contained in given list."""
+  password_not_in: [String!]
+
+  """All values containing the given string."""
+  password_contains: String
+
+  """All values not containing the given string."""
+  password_not_contains: String
+
+  """All values starting with the given string."""
+  password_starts_with: String
+
+  """All values not starting with the given string."""
+  password_not_starts_with: String
+
+  """All values ending with the given string."""
+  password_ends_with: String
+
+  """All values not ending with the given string"""
+  password_not_ends_with: String
+  votes_every: VoteWhereInput
+  votes_some: VoteWhereInput
+  votes_none: VoteWhereInput
 }
 
 """References Person record uniquely"""
 input PersonWhereUniqueInput {
   id: ID
+  email: String
 }
 
 type Post implements Node {
@@ -2121,7 +2407,7 @@ type Post implements Node {
   """The time the document was published. Null on documents in draft stage."""
   publishedAt: DateTime
   title: String!
-  text: RichText
+  text: String
   author(
     """
     Allows to optionally override locale filtering behaviour in the query's subtree.
@@ -2137,6 +2423,29 @@ type Post implements Node {
     """
     locales: [Locale!]
   ): Person
+  votes(
+    where: VoteWhereInput
+    orderBy: VoteOrderByInput
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+
+    """
+    Allows to optionally override locale filtering behaviour in the query's subtree.
+    
+    Note that `votes` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument will overwrite any existing locale filtering defined in the query's tree for the subtree.
+    """
+    locales: [Locale!]
+  ): [Vote!]!
 
   """List of Post versions"""
   history(
@@ -2174,8 +2483,9 @@ input PostCreateInput {
   createdAt: DateTime
   updatedAt: DateTime
   title: String!
-  text: RichTextAST
+  text: String
   author: PersonCreateOneInlineInput
+  votes: VoteCreateManyInlineInput
 }
 
 input PostCreateManyInlineInput {
@@ -2338,7 +2648,38 @@ input PostManyWhereInput {
 
   """All values not ending with the given string"""
   title_not_ends_with: String
+  text: String
+
+  """All values that are not equal to given value."""
+  text_not: String
+
+  """All values that are contained in given list."""
+  text_in: [String!]
+
+  """All values that are not contained in given list."""
+  text_not_in: [String!]
+
+  """All values containing the given string."""
+  text_contains: String
+
+  """All values not containing the given string."""
+  text_not_contains: String
+
+  """All values starting with the given string."""
+  text_starts_with: String
+
+  """All values not starting with the given string."""
+  text_not_starts_with: String
+
+  """All values ending with the given string."""
+  text_ends_with: String
+
+  """All values not ending with the given string"""
+  text_not_ends_with: String
   author: PersonWhereInput
+  votes_every: VoteWhereInput
+  votes_some: VoteWhereInput
+  votes_none: VoteWhereInput
 }
 
 enum PostOrderByInput {
@@ -2352,12 +2693,15 @@ enum PostOrderByInput {
   publishedAt_DESC
   title_ASC
   title_DESC
+  text_ASC
+  text_DESC
 }
 
 input PostUpdateInput {
   title: String
-  text: RichTextAST
+  text: String
   author: PersonUpdateOneInlineInput
+  votes: VoteUpdateManyInlineInput
 }
 
 input PostUpdateManyInlineInput {
@@ -2387,7 +2731,7 @@ input PostUpdateManyInlineInput {
 
 input PostUpdateManyInput {
   title: String
-  text: RichTextAST
+  text: String
 }
 
 input PostUpdateManyWithNestedWhereInput {
@@ -2577,7 +2921,38 @@ input PostWhereInput {
 
   """All values not ending with the given string"""
   title_not_ends_with: String
+  text: String
+
+  """All values that are not equal to given value."""
+  text_not: String
+
+  """All values that are contained in given list."""
+  text_in: [String!]
+
+  """All values that are not contained in given list."""
+  text_not_in: [String!]
+
+  """All values containing the given string."""
+  text_contains: String
+
+  """All values not containing the given string."""
+  text_not_contains: String
+
+  """All values starting with the given string."""
+  text_starts_with: String
+
+  """All values not starting with the given string."""
+  text_not_starts_with: String
+
+  """All values ending with the given string."""
+  text_ends_with: String
+
+  """All values not ending with the given string"""
+  text_not_ends_with: String
   author: PersonWhereInput
+  votes_every: VoteWhereInput
+  votes_some: VoteWhereInput
+  votes_none: VoteWhereInput
 }
 
 """References Post record uniquely"""
@@ -2850,6 +3225,87 @@ type Query {
 
   """Retrieve document version"""
   postVersion(where: VersionWhereInput!): DocumentVersion
+
+  """Retrieve multiple votes"""
+  votes(
+    where: VoteWhereInput
+    orderBy: VoteOrderByInput
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+    stage: Stage! = DRAFT
+
+    """
+    Defines which locales should be returned.
+    
+    Note that `Vote` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument may be overwritten by another locales definition in a
+    relational child field, this will effectively use the overwritten argument
+    for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en]
+  ): [Vote!]!
+
+  """Retrieve a single vote"""
+  vote(
+    where: VoteWhereUniqueInput!
+    stage: Stage! = DRAFT
+
+    """
+    Defines which locales should be returned.
+    
+    Note that `Vote` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument may be overwritten by another locales definition in a
+    relational child field, this will effectively use the overwritten argument
+    for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en]
+  ): Vote
+
+  """Retrieve multiple votes using the Relay connection interface"""
+  votesConnection(
+    where: VoteWhereInput
+    orderBy: VoteOrderByInput
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+    stage: Stage! = DRAFT
+
+    """
+    Defines which locales should be returned.
+    
+    Note that `Vote` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument may be overwritten by another locales definition in a
+    relational child field, this will effectively use the overwritten argument
+    for the affected query's subtree.
+    """
+    locales: [Locale!]! = [en]
+  ): VoteConnection!
+
+  """Retrieve document version"""
+  voteVersion(where: VersionWhereInput!): DocumentVersion
 }
 
 """
@@ -2938,5 +3394,502 @@ input VersionWhereInput {
   id: ID!
   stage: Stage!
   revision: Int!
+}
+
+type Vote implements Node {
+  """System stage field"""
+  stage: Stage!
+
+  """Get the document in other stages"""
+  documentInStages(
+    """Potential stages that should be returned"""
+    stages: [Stage!]! = [DRAFT, PUBLISHED]
+
+    """Decides if the current stage should be included or not"""
+    includeCurrent: Boolean! = false
+
+    """
+    Decides if the documents should match the parent documents locale or should use the fallback order defined in the tree
+    """
+    inheritLocale: Boolean! = false
+  ): [Vote!]!
+
+  """The unique identifier"""
+  id: ID!
+
+  """The time the document was created"""
+  createdAt: DateTime!
+
+  """The time the document was updated"""
+  updatedAt: DateTime!
+
+  """The time the document was published. Null on documents in draft stage."""
+  publishedAt: DateTime
+  post(
+    """
+    Allows to optionally override locale filtering behaviour in the query's subtree.
+    
+    Note that `post` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument will overwrite any existing locale filtering defined in the query's tree for the subtree.
+    """
+    locales: [Locale!]
+  ): Post
+  person(
+    """
+    Allows to optionally override locale filtering behaviour in the query's subtree.
+    
+    Note that `person` is a model without localized fields and will not be
+    affected directly by this argument, however the locales will be passed on to
+    any relational fields in the query's subtree for filtering.
+    For related models with localized fields in the query's subtree, the first
+    locale matching the provided list of locales will be returned, entries with
+    non matching locales will be filtered out.
+    
+    This argument will overwrite any existing locale filtering defined in the query's tree for the subtree.
+    """
+    locales: [Locale!]
+  ): Person
+  value: Int!
+
+  """List of Vote versions"""
+  history(
+    limit: Int! = 10
+    skip: Int! = 0
+
+    """
+    This is optional and can be used to fetch the document version history for a specific stage instead of the current one
+    """
+    stageOverride: Stage
+  ): [Version!]!
+}
+
+input VoteConnectInput {
+  """Document to connect"""
+  where: VoteWhereUniqueInput!
+
+  """
+  Allow to specify document position in list of connected documents, will default to appending at end of list
+  """
+  position: ConnectPositionInput
+}
+
+"""A connection to a list of items."""
+type VoteConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [VoteEdge!]!
+  aggregate: Aggregate!
+}
+
+input VoteCreateInput {
+  createdAt: DateTime
+  updatedAt: DateTime
+  post: PostCreateOneInlineInput
+  person: PersonCreateOneInlineInput
+  value: Int!
+}
+
+input VoteCreateManyInlineInput {
+  """Create and connect multiple existing Vote documents"""
+  create: [VoteCreateInput!]
+
+  """Connect multiple existing Vote documents"""
+  connect: [VoteWhereUniqueInput!]
+}
+
+input VoteCreateOneInlineInput {
+  """Create and connect one Vote document"""
+  create: VoteCreateInput
+
+  """Connect one existing Vote document"""
+  connect: VoteWhereUniqueInput
+}
+
+"""An edge in a connection."""
+type VoteEdge {
+  """The item at the end of the edge."""
+  node: Vote!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+"""Identifies documents"""
+input VoteManyWhereInput {
+  """Contains search across all appropriate fields."""
+  _search: String
+
+  """Logical AND on all given filters."""
+  AND: [VoteWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [VoteWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [VoteWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string"""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  publishedAt: DateTime
+
+  """All values that are not equal to given value."""
+  publishedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  publishedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  publishedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  publishedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  publishedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  publishedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  publishedAt_gte: DateTime
+  post: PostWhereInput
+  person: PersonWhereInput
+  value: Int
+
+  """All values that are not equal to given value."""
+  value_not: Int
+
+  """All values that are contained in given list."""
+  value_in: [Int!]
+
+  """All values that are not contained in given list."""
+  value_not_in: [Int!]
+
+  """All values less than the given value."""
+  value_lt: Int
+
+  """All values less than or equal the given value."""
+  value_lte: Int
+
+  """All values greater than the given value."""
+  value_gt: Int
+
+  """All values greater than or equal the given value."""
+  value_gte: Int
+}
+
+enum VoteOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  publishedAt_ASC
+  publishedAt_DESC
+  value_ASC
+  value_DESC
+}
+
+input VoteUpdateInput {
+  post: PostUpdateOneInlineInput
+  person: PersonUpdateOneInlineInput
+  value: Int
+}
+
+input VoteUpdateManyInlineInput {
+  """Create and connect multiple Vote documents"""
+  create: [VoteCreateInput!]
+
+  """Connect multiple existing Vote documents"""
+  connect: [VoteConnectInput!]
+
+  """
+  Override currently-connected documents with multiple existing Vote documents
+  """
+  set: [VoteWhereUniqueInput!]
+
+  """Update multiple Vote documents"""
+  update: [VoteUpdateWithNestedWhereUniqueInput!]
+
+  """Upsert multiple Vote documents"""
+  upsert: [VoteUpsertWithNestedWhereUniqueInput!]
+
+  """Disconnect multiple Vote documents"""
+  disconnect: [VoteWhereUniqueInput!]
+
+  """Delete multiple Vote documents"""
+  delete: [VoteWhereUniqueInput!]
+}
+
+input VoteUpdateManyInput {
+  value: Int
+}
+
+input VoteUpdateManyWithNestedWhereInput {
+  """Document search"""
+  where: VoteWhereInput!
+
+  """Update many input"""
+  data: VoteUpdateManyInput!
+}
+
+input VoteUpdateOneInlineInput {
+  """Create and connect one Vote document"""
+  create: VoteCreateInput
+
+  """Update single Vote document"""
+  update: VoteUpdateWithNestedWhereUniqueInput
+
+  """Upsert single Vote document"""
+  upsert: VoteUpsertWithNestedWhereUniqueInput
+
+  """Connect existing Vote document"""
+  connect: VoteWhereUniqueInput
+
+  """Disconnect currently connected Vote document"""
+  disconnect: Boolean
+
+  """Delete currently connected Vote document"""
+  delete: Boolean
+}
+
+input VoteUpdateWithNestedWhereUniqueInput {
+  """Unique document search"""
+  where: VoteWhereUniqueInput!
+
+  """Document to update"""
+  data: VoteUpdateInput!
+}
+
+input VoteUpsertInput {
+  """Create document if it didn't exist"""
+  create: VoteCreateInput!
+
+  """Update document if it exists"""
+  update: VoteUpdateInput!
+}
+
+input VoteUpsertWithNestedWhereUniqueInput {
+  """Unique document search"""
+  where: VoteWhereUniqueInput!
+
+  """Upsert data"""
+  data: VoteUpsertInput!
+}
+
+"""Identifies documents"""
+input VoteWhereInput {
+  """Contains search across all appropriate fields."""
+  _search: String
+
+  """Logical AND on all given filters."""
+  AND: [VoteWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [VoteWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [VoteWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string"""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  publishedAt: DateTime
+
+  """All values that are not equal to given value."""
+  publishedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  publishedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  publishedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  publishedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  publishedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  publishedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  publishedAt_gte: DateTime
+  post: PostWhereInput
+  person: PersonWhereInput
+  value: Int
+
+  """All values that are not equal to given value."""
+  value_not: Int
+
+  """All values that are contained in given list."""
+  value_in: [Int!]
+
+  """All values that are not contained in given list."""
+  value_not_in: [Int!]
+
+  """All values less than the given value."""
+  value_lt: Int
+
+  """All values less than or equal the given value."""
+  value_lte: Int
+
+  """All values greater than the given value."""
+  value_gt: Int
+
+  """All values greater than or equal the given value."""
+  value_gte: Int
+}
+
+"""References Vote record uniquely"""
+input VoteWhereUniqueInput {
+  id: ID
 }
 

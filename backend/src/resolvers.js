@@ -1,28 +1,54 @@
-import { delegateToSchema } from '@graphql-tools/delegate'
-import { gql } from 'apollo-server'
-  
-  export default ({ schema, executor }) => ({
-    Query: {
-      posts: (parent, args, context, info) => delegateToSchema({
-        schema,
-        operation: 'query',
-        fieldName: 'posts',
-        context,
-        info,
-      }),
-      people: (parent, args, context, info) => delegateToSchema({
-        schema,
-        operation: 'query',
-        fieldName: 'people',
-        context,
-        info,
-      })
+import { delegateToSchema } from "@graphql-tools/delegate";
+import { gql } from "apollo-server";
+
+export default ({ schema, executor }) => ({
+  Query: {
+    posts: async (parent, args, context, info) => {
+      //Not delegate to schema because votes can be queried
+      const postsQuery = gql`
+        query {
+          posts {
+            id
+            title
+            text
+            author {
+              id
+            }
+          }
+        }
+      `;
+      const { data, errors } = await executor({ document: postsQuery });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+      console.log("People Query", data);
+      return data.posts;
     },
-    Mutation: {
-      write: async (parent, args, context, info) => {
-        const createPostMutation = gql`
-        mutation {
-          createPost(data: {title: "${args.data.title}", author: {connect: {id: "${context.userData.userId}"}}}) {
+    people: async (parent, args, context, info) => {
+      //Not delegate to schema because password can be queried
+      const peopleQuery = gql`
+        query {
+          people {
+            id
+            email
+            name
+            posts {
+              id
+            }
+            votes {
+              id
+            }
+          }
+        }
+      `;
+      const { data, errors } = await executor({ document: peopleQuery });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+      return data.people;
+    },
+  },
+  Mutation: {
+    write: async (parent, args, context, info) => {
+      const createPostMutation = gql`
+        mutation ($title:String!){
+          createPost(data: {title: $title, author: {connect: {id: "${context.userData.userId}"}}}) {
             id
             title
             text
@@ -35,72 +61,86 @@ import { gql } from 'apollo-server'
           }
         }
         `;
-        const { data, errors } = await executor({ document: createPostMutation })
-        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
-        
-        return data.createPost
-      },
-      delete: (parent, args, context, info) => delegateToSchema({
+      const { data, errors } = await executor({
+        document: createPostMutation,
+        variables: { title: args.data.title },
+      });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+
+      return data.createPost;
+    },
+    delete: (parent, args, context, info) =>
+      delegateToSchema({
         schema,
-        operation: 'mutation',
-        fieldName: 'deletePost',
+        operation: "mutation",
+        fieldName: "deletePost",
         args: {
-          where: { id: args.id }
+          where: { id: args.id },
         },
         context,
-        info
+        info,
       }),
-      signup: async (parent, args, context) => {
-        const getEmailQuery = gql`
+    signup: async (parent, args, context) => {
+      const getEmailQuery = gql`
         query {
-          people (where: {email: "${args.email}"}) {
+          people (where: {email: "${args.email.toLowerCase()}"}) {
             email
           }
         }
         `;
-        const { data, errors } = await executor({ document: getEmailQuery })
-        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
-        const { people } = data
-        if (people.length > 0) return "Email already signed up.";
+      const { data, errors } = await executor({ document: getEmailQuery });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+      const { people } = data;
+      if (people.length > 0) return "Email already signed up.";
 
-        const passwordHash = await context.dataSources.udbg.validateAndHashPassword(args.password)
+      const passwordHash = await context.dataSources.udbg.validateAndHashPassword(
+        args.password
+      );
 
-        if (!passwordHash) return "Password invalid. Choose another password."
+      if (!passwordHash) return "Password invalid. Choose another password.";
 
-        const createUser = gql`
+      const createUser = gql`
         mutation {
-          createPerson(data: {name: "${args.name}", email: "${args.email}", password: "${passwordHash}"}) {
+          createPerson(data: {name: "${
+            args.name
+          }", email: "${args.email.toLowerCase()}", password: "${passwordHash}"}) {
             id
           }
         }
         `;
-        const response = await executor({ document: createUser })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      const response = await executor({ document: createUser });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        return context.dataSources.udbg.createJWT(response.data.createPerson.id)
-      },
-      login: async (parent, args, context) => {
-        const getEmailQuery = gql`
+      return context.dataSources.udbg.createJWT(response.data.createPerson.id);
+    },
+    login: async (parent, args, context) => {
+      const getEmailQuery = gql`
         query {
-          people (where: {email: "${args.email}"}) {
+          people (where: {email: "${args.email.toLowerCase()}"}) {
             id
             email
             password
           }
         }
         `;
-        const { data, errors } = await executor({ document: getEmailQuery })
-        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
-        const { people } = data
-        if (people.length != 1) return "Email or Password incorrect.";
+      const { data, errors } = await executor({ document: getEmailQuery });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+      const { people } = data;
+      if (people.length != 1) return "Email or Password incorrect.";
 
-        return context.dataSources.udbg.checkPassword(people[0].id, args.password, people[0].password)
-      },
-      vote: async (parent, args, context, info) => {
-        if (args.voteValue != 1 && args.voteValue != -1) throw new Error("Invalid vote value.")
+      return context.dataSources.udbg.checkPassword(
+        people[0].id,
+        args.password,
+        people[0].password
+      );
+    },
+    vote: async (parent, args, context, info) => {
+      if (args.voteValue != 1 && args.voteValue != -1)
+        throw new Error("Invalid vote value.");
 
-        // get all votes of postId
-        const getVotes = gql`
+      // get all votes of postId
+      const getVotes = gql`
         query {
           posts (where: {id: "${args.postId}"}) {
             votes {
@@ -112,17 +152,18 @@ import { gql } from 'apollo-server'
           }
         }
         `;
-        const { data, errors } = await executor({ document: getVotes })
-        if (errors) throw new Error(errors.map((e) => e.message).join('\n'));
-        const { posts } = data
-        // if the post does not exist  return
-        if (posts.length != 1) return ("PostId " + args.postId + " does not exist.");
+      const { data, errors } = await executor({ document: getVotes });
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+      const { posts } = data;
+      // if the post does not exist  return
+      if (posts.length != 1)
+        return "PostId " + args.postId + " does not exist.";
 
-        let voteMutation
-        
-        // if post has no votes, create first vote
-        if (!posts[0].votes) {
-          voteMutation = gql`
+      let voteMutation;
+
+      // if post has no votes, create first vote
+      if (!posts[0].votes) {
+        voteMutation = gql`
             mutation {
               createVote(data: {value: ${args.voteValue}, person: {connect: {id: "${context.userData.userId}"}}, post: {connect: {id: "${args.postId}"}}}) {
                 id
@@ -130,13 +171,16 @@ import { gql } from 'apollo-server'
               }
             }
           `;
-        } else {  // if post has votes, either add a new vote or update an existing one
-          // get vote from 
-          let vote = posts[0].votes.find(vote => vote.person.id == context.userData.userId)
-          // 
-          if (vote) {
-            // update existing vote
-            voteMutation = gql`
+      } else {
+        // if post has votes, either add a new vote or update an existing one
+        // get vote from
+        let vote = posts[0].votes.find(
+          (vote) => vote.person.id == context.userData.userId
+        );
+        //
+        if (vote) {
+          // update existing vote
+          voteMutation = gql`
               mutation {
                 updateVote(data: {value: ${args.voteValue}}, where: {id: "${vote.id}"}) {
                   id
@@ -144,9 +188,9 @@ import { gql } from 'apollo-server'
                 }
               }
             `;
-          } else {
-            // create new vote
-            voteMutation = gql`
+        } else {
+          // create new vote
+          voteMutation = gql`
               mutation {
                 createVote(data: {value: ${args.voteValue}, person: {connect: {id: "${context.userData.userId}"}}, post: {connect: {id: "${args.postId}"}}}) {
                   id
@@ -154,13 +198,14 @@ import { gql } from 'apollo-server'
                 }
               }
             `;
-          }
         }
+      }
 
-        let response = await executor({ document: voteMutation })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      let response = await executor({ document: voteMutation });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        const postQuery = gql`
+      const postQuery = gql`
         query {
           post (where: {id: "${args.postId}"}) {
             id
@@ -176,15 +221,16 @@ import { gql } from 'apollo-server'
         }
         `;
 
-        response = await executor({ document: postQuery })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      response = await executor({ document: postQuery });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        return response.data.post
-      }
+      return response.data.post;
     },
-    Post:{
-      author: async (parent, args, context) => {
-        const authorQuery = gql`
+  },
+  Post: {
+    author: async (parent, args, context) => {
+      const authorQuery = gql`
         query {
           person (where: {id: "${parent.author.id}"}) {
             id
@@ -197,35 +243,37 @@ import { gql } from 'apollo-server'
         }
         `;
 
-        const response = await executor({ document: authorQuery })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      const response = await executor({ document: authorQuery });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        return response.data.person
-      },
-      votes: async (parent, args, context) => {
-        let votesCounter = 0
-        let voteValueQuery = gql`
+      return response.data.person;
+    },
+    voteResult: async (parent, args, context) => {
+      let votesCounter = 0;
+      let voteValueQuery = gql`
         query {
           votes (where: {post: {id:"${parent.id}"}}) {
             value
           }
         }
         `;
-        const response = await executor({ document: voteValueQuery })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      const response = await executor({ document: voteValueQuery });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        if (response.data.votes) {
-          response.data.votes.forEach(vote => {
-            votesCounter += vote.value
-          });
-        }
+      if (response.data.votes) {
+        response.data.votes.forEach((vote) => {
+          votesCounter += vote.value;
+        });
+      }
 
-        return votesCounter
-      },
+      return votesCounter;
     },
-    Person: {
-      posts: async (parent, args, context) => {
-        const postQuery = gql`
+  },
+  Person: {
+    posts: async (parent, args, context) => {
+      const postQuery = gql`
         query {
           posts (where: {author: {id: "${parent.id}"}}) {
             id
@@ -234,17 +282,15 @@ import { gql } from 'apollo-server'
             author {
               id
             }
-            votes {
-              id
-            }
           }
         }
         `;
 
-        const response = await executor({ document: postQuery })
-        if (response.errors) throw new Error(response.errors.map((e) => e.message).join('\n'));
+      const response = await executor({ document: postQuery });
+      if (response.errors)
+        throw new Error(response.errors.map((e) => e.message).join("\n"));
 
-        return response.data.posts
-      }
-    }
-  });
+      return response.data.posts;
+    },
+  },
+});

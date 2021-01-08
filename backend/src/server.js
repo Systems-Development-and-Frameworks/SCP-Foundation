@@ -10,6 +10,11 @@ const udbg = new UserDatasourceGraphCms();
 const pdb = new PostDatasource(udb);
 
 const dataSources = () => ({ udb, udbg, pdb });
+// const mocks = {
+//   Int: () => 6,
+//   Float: () => 22.1,
+//   String: () => 'Hello',
+//   };
 
 export default async (opts) => {
   const defaults = {
