@@ -20,10 +20,14 @@ describe('Testing queries on GraphCMS', () => {
     describe('query: people', () => {
 
         const PEOPLE = gql`
-        {
-            post (where: {}){
+        query{
+            posts {
                 id
                 title
+                author{
+                    id
+                    name
+                }
             }
         }
         `
