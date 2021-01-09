@@ -20,13 +20,22 @@ You need NodeJS, NPM, VueJS installed on your computer. To run the application, 
 
 ### Backend
 
+Why GraphCMS?
+ - GraphCMS is a headless CMS where you can store and get data from
+ - You don't need to set up a database
+ - Your data is hosted without the need of a self-hosted server
+ - The hosting is free (:
+
 1. Navigate to `./backend/`.
-2. Create a `.env`file
-3. Add a JWT Secret similar to this `JWT_SECRET = Your_Secret`
-4. Save the `.env`file
-5. Run `npm install`.
-6. Run `npm run dev` to start the application server.
-7. Open `localhost:4000` in your web browser to view the application.
+2. (This course only !) Decrypt the `.env` file with `git-crypt-key` provided by the mentors.
+3. Create a `.env`file
+4. Add a JWT Secret similar to this `JWT_SECRET = Your_Secret`
+5. Add a GRAPH_CMS_API_TOKEN that is provided by GraphCMS similar to this `GRAPH_CMS_API_TOKEN = Your_Token`
+6. Add a GRAPH_CMS_ENDPOINT that is provided by GraphCMS similar to this `GRAPH_CMS_ENDPOINT = Your_Endpoint_Url`
+7. Save the `.env`file
+8. Run `npm install`.
+9. Run `npm run dev` to start the application server.
+10. Open `localhost:4000` in your web browser to view the application.
 
 ## Contributors
 
