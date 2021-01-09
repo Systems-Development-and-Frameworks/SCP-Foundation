@@ -1,8 +1,8 @@
 import { createTestClient } from "apollo-server-testing";
 import { ApolloServer, gql } from "apollo-server";
-import Server from "./server";
+import Server from "../server";
 
-jest.mock("./graphCms/schema");
+jest.mock("../graphCms/schema");
 
 let reqMock;
 let resMock;
@@ -23,9 +23,9 @@ describe("Testing queries on GraphCMS", () => {
     reqMock = { headers: {} };
     resMock = {};
   });
-  describe("Person", () => {
-    describe("Returns all properties of Person", () => {
-      const personQuery = gql`
+  describe("Post", () => {
+    describe("Returns all properties of a Post", () => {
+      const postQuery = gql`
         query {
           posts {
             title
@@ -39,8 +39,8 @@ describe("Testing queries on GraphCMS", () => {
         }
       `;
 
-      it("returns array of people", async () => {
-        let res = await query({ query: personQuery });
+      it("returns array of posts", async () => {
+        let res = await query({ query: postQuery });
         console.log(res.data)
         expect(res.data).toEqual({
           posts: [
