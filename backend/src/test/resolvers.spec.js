@@ -2,6 +2,7 @@ import { createTestClient } from "apollo-server-testing";
 import { ApolloServer, gql } from "apollo-server";
 import Server from "../server";
 import { GraphQLError } from "graphql";
+import { context } from "../context"
 
 jest.mock("../graphCms/schema");
 
@@ -12,7 +13,6 @@ let mutate;
 let contextMock = () => context({ req: reqMock, res: resMock });
 
 beforeEach(async () => {
-  let contextMock = () => {};
   const server = await Server({ context: () => contextMock });
   const response = createTestClient(server);
   query = response.query;
@@ -283,7 +283,78 @@ describe("Testing queries on GraphCMS", () => {
 });
 
 describe("Mutations", () => {
-  //TODO: NOT functional yet
+  beforeEach(async () => {
+    reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
+    resMock = {};
+  });
+  describe("Write", () => {
+    const writeMut = gql`
+      mutation {
+        write (data: {title: "Post title"}) {
+          id
+          title
+          voteResult
+          author {
+            id
+            name
+            posts {
+              id
+            }
+          }
+        }
+      }
+    `;
+
+    it("Creates a new post", async () => {
+      let res = await mutate({ mutation: writeMut });
+
+      console.log(res.errors)
+
+      expect(res.data).toEqual({
+        write: {
+          id: expect.any(String),
+          title: "Post title",
+          voteResult: 12,
+          author: {
+            id: expect.any(String),
+            name: "Günther",
+            posts: [
+              {
+                id: expect.any(String),
+              },
+              {
+                id: expect.any(String),
+              },
+            ],
+          }
+        }
+      });
+    })
+  })
+
+  describe("Delete", () => {
+    const deleteMut = gql`
+      mutation {
+        delete (id: "ckjokcgf42fm50a49osudvspq"){
+          id
+          title
+          voteResult
+        }
+      }
+    `;
+
+    it("Deletes a post", async () => {
+      let res = await mutate({ mutation: deleteMut });
+      expect(res.data).toEqual({
+        delete: {
+          id: expect.any(String),
+          title: "Post title",
+          voteResult: 12,
+        }
+      });
+    })
+  })
+
   describe("Signup", () => {
     it("Signs someone up successfully", async () => {
       const signupMut = gql`
@@ -292,9 +363,7 @@ describe("Mutations", () => {
         }
       `;
       let res = await mutate({ mutation: signupMut });
-      expect(res.data).toEqual({
-        //signup: expect.any(String)
-      });
+      expect(res.data).toEqual({signup: expect.any(String)});
     });
 
     it("tries to register existing user", async () => {
@@ -325,7 +394,7 @@ describe("Mutations", () => {
       });
     });
   });
-  //TODO: NOT functional yet
+
   describe("Login", () => {
     it("Signs someone in successfully", async () => {
       const loginMut = gql`

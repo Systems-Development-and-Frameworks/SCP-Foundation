@@ -46,8 +46,8 @@ export default ({ schema, executor }) => ({
   Mutation: {
     write: async (parent, args, context, info) => {
       const createPostMutation = gql`
-        mutation ($title:String!){
-          createPost(data: {title: $title, author: {connect: {id: "${context.userData.userId}"}}}) {
+        mutation {
+          createPost(data: {title: "${args.data.title}", author: {connect: {id: "${context.userData.userId}"}}}) {
             id
             title
             text
@@ -55,30 +55,37 @@ export default ({ schema, executor }) => ({
               value
             }
             author {
-              name
+              id
             }
           }
         }
         `;
       const { data, errors } = await executor({
-        document: createPostMutation,
-        variables: { title: args.data.title },
+        document: createPostMutation
       });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
 
       return data.createPost;
     },
-    delete: (parent, args, context, info) =>
-      delegateToSchema({
-        schema,
-        operation: "mutation",
-        fieldName: "deletePost",
-        args: {
-          where: { id: args.id },
-        },
-        context,
-        info,
-      }),
+    delete: async (parent, args, context, info) => {
+      const deleteMutation = gql`
+        mutation {
+          deletePost(where: {id: "${args.id}"}) {
+            id
+            title
+            text
+            author {
+              id
+            }
+          }
+        }
+        `;
+
+      const { data, errors } = await executor({document: deleteMutation});
+      if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
+
+      return data.deletePost;
+    },
     signup: async (parent, args, context) => {
       const getEmailQuery = gql`
         query {
@@ -90,7 +97,7 @@ export default ({ schema, executor }) => ({
       const { data, errors } = await executor({ document: getEmailQuery });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
       const { person } = data;
-      if (person) return "Email already signed up.";
+      if (person && person.email.toLowerCase() == args.email.toLowerCase()) return "Email already signed up.";
 
       const passwordHash = await context.dataSources.udbg.validateAndHashPassword(
         args.password
