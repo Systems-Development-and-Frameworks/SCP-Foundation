@@ -1,6 +1,7 @@
 import { createTestClient } from "apollo-server-testing";
 import { ApolloServer, gql } from "apollo-server";
 import Server from "../server";
+import { GraphQLError } from "graphql";
 
 jest.mock("../graphCms/schema");
 
@@ -23,53 +24,110 @@ describe("Testing queries on GraphCMS", () => {
     reqMock = { headers: {} };
     resMock = {};
   });
-  describe("Post", () => {
-    describe("Returns all properties of a Post", () => {
-      const postQuery = gql`
-        query {
-          posts {
-            title
+  describe("Post Query", () => {
+    const postQuery = gql`
+      query {
+        posts {
+          id
+          title
+          text
+          voteResult
+          author {
             id
-            voteResult
-            author {
-              id
-              name
-            }
+            name
           }
         }
-      `;
+      }
+    `;
 
-      it("returns array of posts", async () => {
+    it("Lists all posts", async () => {
+      let res = await query({ query: postQuery });
+      
+      expect(res.data).toEqual({
+        posts: [
+          {
+            id: expect.any(String),
+            title: "Post title",
+            text: "Post text",
+            voteResult: 12,
+            author: {
+              id: expect.any(String),
+              name: "Günther",
+            },
+          },
+          {
+            id: expect.any(String),
+            title: "Post title",
+            text: "Post text",
+            voteResult: 12,
+            author: {
+              id: expect.any(String),
+              name: "Günther",
+            },
+          },
+        ],
+      });
+    });
+
+    describe("Post properties", () => {
+      it("Returns all properties", async () => {
         let res = await query({ query: postQuery });
+
+        // voteResult = 12 because votes returns 2 instances with value = 6 each
         expect(res.data).toEqual({
           posts: [
             {
               id: expect.any(String),
-              title: expect.any(String),
-              voteResult: expect.any(Number),
+              title: "Post title",
+              text: "Post text",
+              voteResult: 12,
               author: {
                 id: expect.any(String),
-                name: expect.any(String),
+                name: "Günther",
               },
             },
             {
               id: expect.any(String),
-              title: expect.any(String),
-              voteResult: expect.any(Number),
+              title: "Post title",
+              text: "Post text",
+              voteResult: 12,
               author: {
                 id: expect.any(String),
-                name: expect.any(String),
+                name: "Günther",
               },
             },
           ],
         });
+      });
+
+      it ("Does not return votes list", async () => {
+        const postQueryLocal = gql`
+          query {
+            posts {
+              id
+              votes {
+                value
+              }
+              author {
+                id
+                name
+              }
+            }
+          }
+        `;
+
+        let res = await query({ query: postQueryLocal });
+
+        // voteResult = 12 because votes returns 2 instances with value = 6 each
+        expect(res.errors).toEqual([new GraphQLError("Cannot return null for non-nullable field Post.votes."),
+          new GraphQLError("Cannot return null for non-nullable field Post.votes.")]);
       });
     });
   });
 
   describe("Person", () => {
     it("Return all properties of a person", async () => {
-      const postQuery = gql`
+      const peopleQuery = gql`
         query {
           people {
             name
@@ -80,12 +138,12 @@ describe("Testing queries on GraphCMS", () => {
           }
         }
       `;
-      let res = await query({ query: postQuery });
+      let res = await query({ query: peopleQuery });
       expect(res.data).toEqual({
         people: [
           {
-            email: expect.any(String),
-            name: expect.any(String),
+            email: "günther.jauch@aol.de",
+            name: "Günther",
             posts: [
               {
                 id: expect.any(String),
@@ -96,8 +154,8 @@ describe("Testing queries on GraphCMS", () => {
             ],
           },
           {
-            email: expect.any(String),
-            name: expect.any(String),
+            email: "günther.jauch@aol.de",
+            name: "Günther",
             posts: [
               {
                 id: expect.any(String),
@@ -109,6 +167,117 @@ describe("Testing queries on GraphCMS", () => {
           },
         ],
       });
+    });
+  });
+
+  describe("Nested", () => {
+    it("Returns name of author of posts of author of posts", async () => {
+      const postQuery = gql`
+        query {
+          posts {
+            id
+            title
+            author {
+              id
+              name
+              posts {
+                id
+                title
+                voteResult
+                author {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      let res = await query({ query: postQuery });
+      expect(res.data).toEqual({
+          posts: [
+            {
+              id: expect.any(String),
+              title: "Post title",
+              author: {
+                id: expect.any(String),
+                name: "Günther",
+                posts: [
+                  {
+                    id: expect.any(String),
+                    title: "Post title",
+                    voteResult: 12,
+                    author: {
+                      id: expect.any(String),
+                      name: "Günther",
+                    }
+                  },
+                  {
+                    id: expect.any(String),
+                    title: "Post title",
+                    voteResult: 12,
+                    author: {
+                      id: expect.any(String),
+                      name: "Günther",
+                    }
+                  },
+                ]
+              },
+            },
+            {
+              id: expect.any(String),
+              title: "Post title",
+              author: {
+                id: expect.any(String),
+                name: "Günther",
+                posts: [
+                  {
+                    id: expect.any(String),
+                    title: "Post title",
+                    voteResult: 12,
+                    author: {
+                      id: expect.any(String),
+                      name: "Günther",
+                    }
+                  },
+                  {
+                    id: expect.any(String),
+                    title: "Post title",
+                    voteResult: 12,
+                    author: {
+                      id: expect.any(String),
+                      name: "Günther",
+                    }
+                  },
+                ]
+              },
+            },
+          ],
+        });
+    });
+
+    it("Does not return votes", async () => {
+      const personQuery = gql`
+        query {
+          people {
+            id
+            name
+            posts {
+              id
+              title
+              votes {
+                id
+                value
+              }
+            }
+          }
+        }
+      `;
+
+      let res = await query({ query: personQuery });
+      expect(res.errors).toEqual([new GraphQLError("Cannot return null for non-nullable field Post.votes."),
+      new GraphQLError("Cannot return null for non-nullable field Post.votes.")]);
     });
   });
 });
