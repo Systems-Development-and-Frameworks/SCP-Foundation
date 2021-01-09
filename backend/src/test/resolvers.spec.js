@@ -41,7 +41,6 @@ describe("Testing queries on GraphCMS", () => {
 
       it("returns array of posts", async () => {
         let res = await query({ query: postQuery });
-        console.log(res.data)
         expect(res.data).toEqual({
           posts: [
             {
@@ -77,10 +76,11 @@ describe("Mutations", () => {
         signup(name: "Peter", email: "mail@mail.de", password: "password")
       }
     `;
-    it("signs someone up", async () => {
+    it("Signs someone up successfully", async () => {
         let res = await mutate({ mutation: signupMut });
-        console.log(res);
-        expect(res.data).toEqual({})
+        expect(res.data).toEqual({
+          //signup: expect.any(String)
+        })
     });
   });
   //TODO: NOT functional yet
@@ -88,10 +88,11 @@ describe("Mutations", () => {
     const loginMut = gql`
     mutation login {login(email: "günther.jauch@aol.de" password: "password")}
     `;
-    it("signs someone up", async () => {
+    it("Signs someone in successfully", async () => {
         let res = await mutate({ mutation: loginMut });
-        console.log(res);
-        expect(res.data).toEqual({})
+        expect(res.data).toEqual({
+          login: expect.any(String)
+        })
     });
   });
 });

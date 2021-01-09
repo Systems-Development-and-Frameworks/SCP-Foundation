@@ -4,7 +4,7 @@ const isAuthenticatedUser = rule({cache: 'contextual'})(
   async (parent, args, context) => {
     let userData = context.userData
 
-    if (context.dataSources.udbg.userExists(userData.userId)){
+    if (await context.dataSources.udbg.userExists(userData.userId)){
       context.currentUser = userData.userId
       return true
     }else {

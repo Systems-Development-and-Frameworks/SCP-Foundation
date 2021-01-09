@@ -82,15 +82,15 @@ export default ({ schema, executor }) => ({
     signup: async (parent, args, context) => {
       const getEmailQuery = gql`
         query {
-          people (where: {email: "${args.email.toLowerCase()}"}) {
+          person (where: {email: "${args.email.toLowerCase()}"}) {
             email
           }
         }
         `;
       const { data, errors } = await executor({ document: getEmailQuery });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
-      const { people } = data;
-      if (people.length > 0) return "Email already signed up.";
+      const { person } = data;
+      if (person) return "Email already signed up.";
 
       const passwordHash = await context.dataSources.udbg.validateAndHashPassword(
         args.password
@@ -116,7 +116,7 @@ export default ({ schema, executor }) => ({
     login: async (parent, args, context) => {
       const getEmailQuery = gql`
         query {
-          people (where: {email: "${args.email.toLowerCase()}"}) {
+          person (where: {email: "${args.email.toLowerCase()}"}) {
             id
             email
             password
@@ -125,13 +125,13 @@ export default ({ schema, executor }) => ({
         `;
       const { data, errors } = await executor({ document: getEmailQuery });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
-      const { people } = data;
-      if (people.length != 1) return "Email or Password incorrect.";
+      const { person } = data;
+      if (!person) return "Email or Password incorrect.";
 
       return context.dataSources.udbg.checkPassword(
-        people[0].id,
+        person.id,
         args.password,
-        people[0].password
+        person.password
       );
     },
     vote: async (parent, args, context, info) => {

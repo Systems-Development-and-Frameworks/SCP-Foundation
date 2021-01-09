@@ -38,18 +38,19 @@ export class UserDatasourceGraphCms extends DataSource {
   }
 
   async userExists(userId){
-    const getEmailQuery = gql`
+    const getUserQuery = gql`
         query {
-          people (where: {id: "${userId}"}) {
+          person (where: {id: "${userId}"}) {
             id
             email
             password
           }
         }
         `;
-      const { data, errors } = await executor({ document: getEmailQuery });
+      const { data, errors } = await executor({ document: getUserQuery });
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
-      const { people } = data;
-      if (people.length != 1) return "Email or Password incorrect.";
+      const { person } = data;
+      if (!person) return false;
+      return true;
   }
 }
