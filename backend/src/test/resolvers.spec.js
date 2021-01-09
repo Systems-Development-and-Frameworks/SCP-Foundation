@@ -66,33 +66,119 @@ describe("Testing queries on GraphCMS", () => {
       });
     });
   });
+
+  describe("Person", () => {
+    it("Return all properties of a person", async () => {
+      const postQuery = gql`
+        query {
+          people {
+            name
+            email
+            posts {
+              id
+            }
+          }
+        }
+      `;
+      let res = await query({ query: postQuery });
+      expect(res.data).toEqual({
+        people: [
+          {
+            email: expect.any(String),
+            name: expect.any(String),
+            posts: [
+              {
+                id: expect.any(String),
+              },
+              {
+                id: expect.any(String),
+              },
+            ],
+          },
+          {
+            email: expect.any(String),
+            name: expect.any(String),
+            posts: [
+              {
+                id: expect.any(String),
+              },
+              {
+                id: expect.any(String),
+              },
+            ],
+          },
+        ],
+      });
+    });
+  });
 });
 
 describe("Mutations", () => {
-    //TODO: NOT functional yet
+  //TODO: NOT functional yet
   describe("Signup", () => {
-    const signupMut = gql`
-      mutation {
-        signup(name: "Peter", email: "mail@mail.de", password: "password")
-      }
-    `;
     it("Signs someone up successfully", async () => {
-        let res = await mutate({ mutation: signupMut });
-        expect(res.data).toEqual({
-          //signup: expect.any(String)
-        })
+      const signupMut = gql`
+        mutation {
+          signup(name: "Peter", email: "mail@mail.de", password: "password")
+        }
+      `;
+      let res = await mutate({ mutation: signupMut });
+      expect(res.data).toEqual({
+        //signup: expect.any(String)
+      });
+    });
+
+    it("tries to register existing user", async () => {
+      const signupMut = gql`
+        mutation {
+          signup(
+            name: "Peter"
+            email: "günther.jauch@aol.de"
+            password: "password"
+          )
+        }
+      `;
+      let res = await mutate({ mutation: signupMut });
+      expect(res.data).toEqual({
+        signup: "Email already signed up.",
+      });
+    });
+
+    it("Provides invalid password error", async () => {
+      const signupMut = gql`
+        mutation {
+          signup(name: "Peter", email: "mail@mail.de", password: "pass")
+        }
+      `;
+      let res = await mutate({ mutation: signupMut });
+      expect(res.data).toEqual({
+        signup: "Password invalid. Choose another password.",
+      });
     });
   });
   //TODO: NOT functional yet
   describe("Login", () => {
-    const loginMut = gql`
-    mutation login {login(email: "günther.jauch@aol.de" password: "password")}
-    `;
     it("Signs someone in successfully", async () => {
-        let res = await mutate({ mutation: loginMut });
-        expect(res.data).toEqual({
-          login: expect.any(String)
-        })
+      const loginMut = gql`
+        mutation login {
+          login(email: "günther.jauch@aol.de", password: "password")
+        }
+      `;
+      let res = await mutate({ mutation: loginMut });
+      expect(res.data).toEqual({
+        login: expect.any(String),
+      });
+    });
+    it("fails to sign in", async () => {
+      const loginMut = gql`
+        mutation login {
+          login(email: "günther.jauch@aol.de", password: "password123")
+        }
+      `;
+      let res = await mutate({ mutation: loginMut });
+      expect(res.data).toEqual({
+        login: "User or Password incorrect",
+      });
     });
   });
 });
