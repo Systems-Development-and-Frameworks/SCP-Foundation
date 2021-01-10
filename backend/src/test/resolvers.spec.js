@@ -283,10 +283,6 @@ describe("Testing queries on GraphCMS", () => {
 });
 
 describe("Mutations", () => {
-  beforeEach(async () => {
-    reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
-    resMock = {};
-  });
   describe("Write", () => {
     const writeMut = gql`
       mutation {
@@ -305,30 +301,45 @@ describe("Mutations", () => {
       }
     `;
 
-    it("Creates a new post", async () => {
-      let res = await mutate({ mutation: writeMut });
-
-      console.log(res.errors)
-
-      expect(res.data).toEqual({
-        write: {
-          id: expect.any(String),
-          title: "Post title",
-          voteResult: 12,
-          author: {
-            id: expect.any(String),
-            name: "Günther",
-            posts: [
-              {
-                id: expect.any(String),
-              },
-              {
-                id: expect.any(String),
-              },
-            ],
-          }
-        }
+    describe("Unauthenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer Unauthenticated"} };
+        resMock = {};
       });
+      it("Throws authorization error", async () => {
+        let res = await mutate({ mutation: writeMut });
+        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+      })
+    })
+
+    describe("Authenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
+        resMock = {};
+      });
+      it("Creates a new post", async () => {
+        let res = await mutate({ mutation: writeMut });
+  
+        expect(res.data).toEqual({
+          write: {
+            id: expect.any(String),
+            title: "Post title",
+            voteResult: 12,
+            author: {
+              id: expect.any(String),
+              name: "Günther",
+              posts: [
+                {
+                  id: expect.any(String),
+                },
+                {
+                  id: expect.any(String),
+                },
+              ],
+            }
+          }
+        });
+      })
     })
   })
 
@@ -343,15 +354,168 @@ describe("Mutations", () => {
       }
     `;
 
-    it("Deletes a post", async () => {
-      let res = await mutate({ mutation: deleteMut });
-      expect(res.data).toEqual({
-        delete: {
-          id: expect.any(String),
-          title: "Post title",
-          voteResult: 12,
-        }
+    describe("Unauthenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer Unauthenticated"} };
+        resMock = {};
       });
+      it("Throws authorization error", async () => {
+        let res = await mutate({ mutation: deleteMut });
+        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+      })
+    })
+
+    describe("Authenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
+        resMock = {};
+      });
+
+      it("Deletes a post", async () => {
+        let res = await mutate({ mutation: deleteMut });
+        expect(res.data).toEqual({
+          delete: {
+            id: expect.any(String),
+            title: "Post title",
+            voteResult: 12,
+          }
+        });
+      })
+    })
+  })
+
+  describe("Vote", () => {
+    const upvoteMut = gql`
+      mutation {
+        vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: 1){
+          id
+          title
+          voteResult
+          author {
+            id
+          }
+        }
+      }
+    `;
+
+    describe("Unauthenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer Unauthenticated"} };
+        resMock = {};
+      });
+      it("Throws authorization error", async () => {
+        let res = await mutate({ mutation: upvoteMut });
+        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+      })
+    })
+
+    describe("Authenticated", () => {
+      beforeEach(async () => {
+        reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
+        resMock = {};
+      });
+
+      it("Upvotes a post", async () => {
+        let res = await mutate({ mutation: upvoteMut });
+        expect(res.data).toEqual({
+          vote: {
+            id: expect.any(String),
+            title: "Post title",
+            voteResult: 12,
+            author: {
+              id: expect.any(String)
+            }
+          }
+        });
+      })
+
+      it("Downvotes a post", async () => {
+        const downvoteMut = gql`
+          mutation {
+            vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: -1){
+              id
+              title
+              voteResult
+              author {
+                id
+              }
+            }
+          }
+        `;
+        let res = await mutate({ mutation: downvoteMut });
+        expect(res.data).toEqual({
+          vote: {
+            id: expect.any(String),
+            title: "Post title",
+            voteResult: 12,
+            author: {
+              id: expect.any(String)
+            }
+          }
+        });
+      })
+
+      describe("Does not vote when invalid value", () => {
+        it("Value = 0", async () => {
+          const invalidValueMut = gql`
+            mutation {
+              vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: 0){
+                id
+              }
+            }
+          `;
+          let res = await mutate({ mutation: invalidValueMut });
+          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+        })
+
+        it("Value = 2", async () => {
+          const invalidValueMut = gql`
+            mutation {
+              vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: 2){
+                id
+              }
+            }
+          `;
+          let res = await mutate({ mutation: invalidValueMut });
+          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+        })
+
+        it("Value = 10", async () => {
+          const invalidValueMut = gql`
+            mutation {
+              vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: 10){
+                id
+              }
+            }
+          `;
+          let res = await mutate({ mutation: invalidValueMut });
+          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+        })
+
+        it("Value = -2", async () => {
+          const invalidValueMut = gql`
+            mutation {
+              vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: -2){
+                id
+              }
+            }
+          `;
+          let res = await mutate({ mutation: invalidValueMut });
+          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+        })
+
+        it("Value = -10", async () => {
+          const invalidValueMut = gql`
+            mutation {
+              vote (postId: "ckjokcgf42fm50a49osudvspq", voteValue: -10){
+                id
+              }
+            }
+          `;
+          let res = await mutate({ mutation: invalidValueMut });
+          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+        })
+      })
     })
   })
 

@@ -1,5 +1,6 @@
 import { delegateToSchema } from "@graphql-tools/delegate";
 import { gql } from "apollo-server";
+import { GraphQLError } from "graphql";
 
 export default ({ schema, executor }) => ({
   Query: {
@@ -45,6 +46,7 @@ export default ({ schema, executor }) => ({
   },
   Mutation: {
     write: async (parent, args, context, info) => {
+      if (!context.userData) throw new GraphQLError("Not Authorized!");
       const createPostMutation = gql`
         mutation {
           createPost(data: {title: "${args.data.title}", author: {connect: {id: "${context.userData.userId}"}}}) {
@@ -68,6 +70,7 @@ export default ({ schema, executor }) => ({
       return data.createPost;
     },
     delete: async (parent, args, context, info) => {
+      if (!context.userData) throw new GraphQLError("Not Authorized!");
       const deleteMutation = gql`
         mutation {
           deletePost(where: {id: "${args.id}"}) {
@@ -142,13 +145,16 @@ export default ({ schema, executor }) => ({
       );
     },
     vote: async (parent, args, context, info) => {
+      if (!context.userData) throw new GraphQLError("Not Authorized!");
+
       if (args.voteValue != 1 && args.voteValue != -1)
-        throw new Error("Invalid vote value.");
+        throw new GraphQLError("Invalid vote value.");
 
       // get all votes of postId
       const getVotes = gql`
         query {
           posts (where: {id: "${args.postId}"}) {
+            id
             votes {
               id
               person {
@@ -162,7 +168,7 @@ export default ({ schema, executor }) => ({
       if (errors) throw new Error(errors.map((e) => e.message).join("\n"));
       const { posts } = data;
       // if the post does not exist  return
-      if (posts.length != 1)
+      if (posts.length < 1)
         return "PostId " + args.postId + " does not exist.";
 
       let voteMutation;
@@ -217,9 +223,6 @@ export default ({ schema, executor }) => ({
             id
             title
             text
-            votes {
-              id
-            }
             author {
               id
             }
