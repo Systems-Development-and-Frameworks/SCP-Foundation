@@ -3,8 +3,6 @@ import { graphCmsEndpoint } from "../config";
 import { GraphQLDataSource } from "apollo-datasource-graphql"
 import { gql } from "apollo-server"
 
-const {DataSource} = require('apollo-datasource');
-
 export class PostDatasource extends GraphQLDataSource {
 
     constructor(userDatasource, posts = null) {

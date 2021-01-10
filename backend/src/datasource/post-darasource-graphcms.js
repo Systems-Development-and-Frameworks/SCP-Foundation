@@ -5,10 +5,6 @@ export class PostDatasourceGraphCMS extends DataSource {
         return votes.find(vote => vote.person.id == userId) ? true : false
     }
 
-    votePost(post_id, user_id, value) {
-        
-    }
-
     getVotes(post_id) {
         let post = this.posts.find(post => post.id == post_id)
         let votesCounter = 0

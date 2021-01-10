@@ -40,5 +40,7 @@ Why GraphCMS?
 ## Contributors
 
 [Aimtracker](https://github.com/Aimtracker)
+
 [Sboui431](https://github.com/Sboui431)
+
 [MatzeK105](https://github.com/MatzeK105)

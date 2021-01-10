@@ -1,5 +1,5 @@
 import { createTestClient } from "apollo-server-testing";
-import { ApolloServer, gql } from "apollo-server";
+import { gql } from "apollo-server";
 import Server from "../server";
 import { GraphQLError } from "graphql";
 import { context } from "../context"
@@ -308,7 +308,7 @@ describe("Mutations", () => {
       });
       it("Throws authorization error", async () => {
         let res = await mutate({ mutation: writeMut });
-        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+        expect(res.errors).toEqual([new GraphQLError("Not Authorised!")]);
       })
     })
 
@@ -361,7 +361,7 @@ describe("Mutations", () => {
       });
       it("Throws authorization error", async () => {
         let res = await mutate({ mutation: deleteMut });
-        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+        expect(res.errors).toEqual([new GraphQLError("Not Authorised!")]);
       })
     })
 
@@ -405,7 +405,7 @@ describe("Mutations", () => {
       });
       it("Throws authorization error", async () => {
         let res = await mutate({ mutation: upvoteMut });
-        expect(res.errors).toEqual([new GraphQLError("Not Authorized!")]);
+        expect(res.errors).toEqual([new GraphQLError("Not Authorised!")]);
       })
     })
 
@@ -456,6 +456,10 @@ describe("Mutations", () => {
       })
 
       describe("Does not vote when invalid value", () => {
+        beforeEach(async () => {
+          reqMock = { headers: {authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJQZXJzb25JZCIsImlhdCI6MTYxMDIzMzg2MH0.gVSO4ZeOnxTjZQoW1oaYJsoQHC21c9pH1kaQp516VU0"} };
+          resMock = {};
+        });
         it("Value = 0", async () => {
           const invalidValueMut = gql`
             mutation {
@@ -465,7 +469,7 @@ describe("Mutations", () => {
             }
           `;
           let res = await mutate({ mutation: invalidValueMut });
-          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+          expect(res.errors).toEqual([new Error("Invalid vote value.")]);
         })
 
         it("Value = 2", async () => {
@@ -477,7 +481,7 @@ describe("Mutations", () => {
             }
           `;
           let res = await mutate({ mutation: invalidValueMut });
-          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+          expect(res.errors).toEqual([new Error("Invalid vote value.")]);
         })
 
         it("Value = 10", async () => {
@@ -489,7 +493,7 @@ describe("Mutations", () => {
             }
           `;
           let res = await mutate({ mutation: invalidValueMut });
-          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+          expect(res.errors).toEqual([new Error("Invalid vote value.")]);
         })
 
         it("Value = -2", async () => {
@@ -501,7 +505,7 @@ describe("Mutations", () => {
             }
           `;
           let res = await mutate({ mutation: invalidValueMut });
-          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+          expect(res.errors).toEqual([new Error("Invalid vote value.")]);
         })
 
         it("Value = -10", async () => {
@@ -513,7 +517,7 @@ describe("Mutations", () => {
             }
           `;
           let res = await mutate({ mutation: invalidValueMut });
-          expect(res.errors).toEqual([new GraphQLError("Invalid vote value.")]);
+          expect(res.errors).toEqual([new Error("Invalid vote value.")]);
         })
       })
     })

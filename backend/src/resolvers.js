@@ -46,7 +46,6 @@ export default ({ schema, executor }) => ({
   },
   Mutation: {
     write: async (parent, args, context, info) => {
-      if (!context.userData) throw new GraphQLError("Not Authorized!");
       const createPostMutation = gql`
         mutation {
           createPost(data: {title: "${args.data.title}", author: {connect: {id: "${context.userData.userId}"}}}) {
@@ -70,7 +69,6 @@ export default ({ schema, executor }) => ({
       return data.createPost;
     },
     delete: async (parent, args, context, info) => {
-      if (!context.userData) throw new GraphQLError("Not Authorized!");
       const deleteMutation = gql`
         mutation {
           deletePost(where: {id: "${args.id}"}) {
@@ -145,10 +143,8 @@ export default ({ schema, executor }) => ({
       );
     },
     vote: async (parent, args, context, info) => {
-      if (!context.userData) throw new GraphQLError("Not Authorized!");
-
       if (args.voteValue != 1 && args.voteValue != -1)
-        throw new GraphQLError("Invalid vote value.");
+        return new Error("Invalid vote value.");
 
       // get all votes of postId
       const getVotes = gql`
