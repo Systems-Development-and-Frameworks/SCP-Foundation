@@ -1,8 +1,9 @@
 import {Post, Vote} from "../classes/post"
+import { graphCmsEndpoint } from "../config";
+import { GraphQLDataSource } from "apollo-datasource-graphql"
+import { gql } from "apollo-server"
 
-const {DataSource} = require('apollo-datasource');
-
-export class PostDatasource extends DataSource {
+export class PostDatasource extends GraphQLDataSource {
 
     constructor(userDatasource, posts = null) {
         super()
@@ -12,6 +13,7 @@ export class PostDatasource extends DataSource {
             new Post(1, 'Post 1', 1),
             new Post(2, 'Post 2', 2),
         ];
+        this.baseURL = graphCmsEndpoint
     }
 
     allPosts() {
@@ -79,5 +81,17 @@ export class PostDatasource extends DataSource {
         return this.posts.filter((post) => {
             return post.user_id == user_id;
         })
+    }
+
+    async getPosts() {
+        const {data} = await this.query(gql`{ posts { title }}`)
+
+        return data.posts
+    }
+
+    async writePosts() {
+        const {data} = await this.mutation(gql`{ write (post:{title:"testPost"}) { title } }`)
+
+        return data.posts
     }
 }

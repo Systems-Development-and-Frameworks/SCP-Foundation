@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import List from "./components/list-component/list-component";
+import List from "../components/list-component/list-component";
 
 export default {
   name: "App",
