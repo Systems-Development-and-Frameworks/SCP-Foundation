@@ -28,7 +28,7 @@
 import ItemComponent from "../item-component/item-component";
 import ItemFormComponent from "../item-form-component/item-form-component";
 import Item from "../../classes/item";
-import { mapGetters } from "vuex"
+import { mapGetters, mapActions } from "vuex"
 
 export default {
   name: "List",
@@ -42,7 +42,12 @@ export default {
       orderAscending: true,
     };
   },
+  created () {
+    console.log("Created")
+    this.getPosts({apollo:this.$apollo})
+  },
   methods: {
+    ...mapActions('posts', ['getPosts']),
     removeItem(item) {
       this.itemList = this.itemList.filter((i) => {
         return item.id !== i.id;

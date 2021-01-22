@@ -1,5 +1,9 @@
 query posts {
     posts {
-        id
+        id,
+        title,
+        author {
+            id
+        }
     }
 }
