@@ -12,7 +12,7 @@
 
 <script>
 import Index from "../../pages/index.vue";
-import { actions } from "../../store/auth.js"
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   name: "LoginFormComponent",
@@ -29,9 +29,10 @@ export default {
     Index,
   },
   methods: {
+    ...mapActions('auth', ['login']),
     async onSubmit() {
       console.log("apollo", this.$apollo)
-      actions.login(this.credentials)
+      this.login({...this.credentials, apollo: this.$apollo})
 
       //console.log(res)
     },

@@ -15,7 +15,8 @@
     "nuxt": "^2.14.6",
     "vue": "^2.6.12",
     "vue-server-renderer": "^2.6.12",
-    "vue-template-compiler": "^2.6.12"
+    "vue-template-compiler": "^2.6.12",
+    "vuex": "^3.6.0"
   },
   "devDependencies": {
     "@nuxtjs/storybook": "^3.3.0",

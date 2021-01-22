@@ -4,8 +4,9 @@ export const WRONG_CREDENTIALS = "User or password incorrect."
 
 export default (_context, inject) => {
     inject('api', {
-        async login({ email, password }) {
-            let res = await this.$apollo.mutate({
+        async login({ email, password, apollo }) {
+            console.log("api.js", apollo)
+            let res = await apollo.mutate({
                 mutation: login,
                 variables: { email, password }
             })

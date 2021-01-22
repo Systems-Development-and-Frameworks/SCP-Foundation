@@ -26,17 +26,16 @@ export const mutations = {
 }
 
 export const actions = {
-  async login({ email, password }) {
-    // { commit }, 
-    //commit(SET_LOADING, true)
+  async login({ commit },{ email, password, apollo}) { 
+    commit(SET_LOADING, true)
     try {
-      const { token } = await this.$api.login({ email, password })
-      //commit(SET_TOKEN, token)
+      const { token } = await this.$api.login({ email, password, apollo})
+      commit(SET_TOKEN, token)
     } catch (err) {
       if (err.message === WRONG_CREDENTIALS) return false
       throw err
     } finally {
-      //commit(SET_LOADING, false)
+      commit(SET_LOADING, false)
     }
   },
   logout({ commit }) {
