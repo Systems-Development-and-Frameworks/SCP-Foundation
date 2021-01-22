@@ -28,12 +28,18 @@ export default {
   components: {
     Index,
   },
+  computed: {
+    ...mapGetters('auth', ['loggedIn']),
+  },
   methods: {
     ...mapActions('auth', ['login']),
     async onSubmit() {
       console.log("apollo", this.$apollo)
-      this.login({...this.credentials, apollo: this.$apollo})
+      await this.login({...this.credentials, apollo: this.$apollo})
+      this.credentials.email = ""
+      this.credentials.password = ""
 
+      if (this.loggedIn) this.$router.push("/")
       //console.log(res)
     },
   }

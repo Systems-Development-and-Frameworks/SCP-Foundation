@@ -1,16 +1,24 @@
 <template>
   <div class="menuButton">
-    <NuxtLink to="/login">Login</NuxtLink>
+    <template v-if="loggedIn"> 
+      <button @click="logout">Logout</button>
+    </template>
+    <template v-else>
+      <NuxtLink to="/login">Login</NuxtLink>
+    </template>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex"
+
 export default {
   name: "MenuComponent",
-  props: {
+  computed: {
+    ...mapGetters('auth', ['loggedIn']),
   },
   methods: {
-
+    ...mapActions('auth', ['logout']),
   },
 };
 </script>
