@@ -19,7 +19,7 @@
     </div>
 
 
-    <ItemFormComponent @submitEvent="onSubmit" />
+    <ItemFormComponent @submitEvent="onSubmit" v-if="loggedIn"/>
     <div></div>
   </div>
 </template>
@@ -28,6 +28,7 @@
 import ItemComponent from "../item-component/item-component";
 import ItemFormComponent from "../item-form-component/item-form-component";
 import Item from "../../classes/item";
+import { mapGetters } from "vuex"
 
 export default {
   name: "List",
@@ -75,6 +76,7 @@ export default {
           return a.votes - b.votes
       });
     },
+    ...mapGetters('auth', ['loggedIn']),
   },
 };
 </script>

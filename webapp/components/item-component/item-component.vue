@@ -3,16 +3,22 @@
     <h2>{{ item.title }} ({{ item.votes }})</h2>
     <button class="upvote-button" @click="updateItem(item, 1)">Upvote</button>
     <button class="downvote-button" @click="updateItem(item, -1)">Downvote</button>
-    <button class="remove-button" @click="removeItem(item)">Remove</button>
+    <button class="remove-button" @click="removeItem(item)" v-if="loggedInAndOwner()">Remove</button>
+    <button class="edit-button" v-if="loggedInAndOwner()">Edit</button>
   </div>
 </template>
 
 <script>
 import Item from "../../classes/item";
+import { mapGetters } from 'vuex'
+
 export default {
   name: "ItemComponent",
   props: {
     item: Item,
+  },
+  computed: {
+    ...mapGetters('auth', ['loggedIn']),
   },
   methods: {
     removeItem(item) {
@@ -20,10 +26,23 @@ export default {
     },
 
     updateItem(item, value) {
-      const currentVotes = item.getVotes()
-      item.setVotes(currentVotes + value)
-      this.$emit("updateEvent", item);
+      if (this.loggedIn) {
+        const currentVotes = item.getVotes()
+        item.setVotes(currentVotes + value)
+        this.$emit("updateEvent", item);
+      } else {
+        this.$router.push("/login")
+      }
     },
+
+    loggedInAndOwner() {
+      if (this.loggedIn) {
+        // TODO: check if owner
+        return true;
+      }
+
+      return false;
+    }
   },
 };
 </script>

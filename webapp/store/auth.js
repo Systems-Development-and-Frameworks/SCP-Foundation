@@ -1,5 +1,6 @@
 import { WRONG_CREDENTIALS } from '../plugins/api.js'
-import { SET_USER, SET_TOKEN, SET_LOADING } from './store.js'
+import { SET_USER_ID, SET_TOKEN, SET_LOADING } from './store.js'
+import jwt_decode from 'jwt-decode'
 
 export const state = () => ({
   loading: false,
@@ -17,8 +18,8 @@ export const mutations = {
   [SET_TOKEN](state, token) {
     state.token = token
   },
-  [SET_USER](state, user) {
-    state.currentUser = user
+  [SET_USER_ID](state, userId) {
+    state.currentUserId = userId
   },
   [SET_LOADING](state, loading) {
     state.loading = loading
@@ -31,6 +32,9 @@ export const actions = {
     try {
       const { token } = await this.$api.login({ email, password, apollo})
       commit(SET_TOKEN, token)
+
+      let tokenDecoded = jwt_decode(token)
+      commit(SET_USER_ID, tokenDecoded.userId)
     } catch (err) {
       if (err.message === WRONG_CREDENTIALS) return false
       throw err
