@@ -3,8 +3,8 @@
     <form class="sign-in" @submit.prevent="onSubmit">
       <h2> Sign In </h2>
       <div>Use your account</div>
-      <input class="input_sign" id="username" type="text" placeholder="Username" />
-      <input class="input_sign" id="password" type="password"  placeholder="Password"/>
+      <input class="input_sign" id="username" type="text" placeholder="Username" v-model="credentials.email"/>
+      <input class="input_sign" id="password" type="password"  placeholder="Password" v-model="credentials.password"/>
       <input class="button_sign" type="submit" value="Login" name="login" id="login" />
     </form>
   </div>
@@ -12,13 +12,13 @@
 
 <script>
 import Index from "../../pages/index.vue";
-import login from "../../gql/login.gql";
+import { actions } from "../../store/auth.js"
 
 export default {
   name: "LoginFormComponent",
   data(){
     return{
-      credentils: {
+      credentials: {
         email: '',
         password: ''
       }
@@ -31,11 +31,9 @@ export default {
   methods: {
     async onSubmit() {
       console.log("apollo", this.$apollo)
-      let res = await this.$apollo.mutate({
-        mutation: login,
-      })
+      actions.login(this.credentials)
 
-      console.log(res)
+      //console.log(res)
     },
   }
 };
