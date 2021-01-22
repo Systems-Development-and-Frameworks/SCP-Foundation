@@ -1,31 +1,43 @@
 <template>
   <div class="container">
-    <form class="sign-in">
+    <form class="sign-in" @submit.prevent="onSubmit">
       <h2> Sign In </h2>
       <div>Use your account</div>
-        <input class="input_sign" id="username" type="text" placeholder="Username" />
-        <input class="input_sign" id="password" type="password"  placeholder="Passowrd"/>
-        <input class="button_sign" type="submit" value="Login" name="login" id="login" />
-      
+      <input class="input_sign" id="username" type="text" placeholder="Username" />
+      <input class="input_sign" id="password" type="password"  placeholder="Password"/>
+      <input class="button_sign" type="submit" value="Login" name="login" id="login" />
     </form>
   </div>
 </template>
 
 <script>
 import Index from "../../pages/index.vue";
+import login from "../../gql/login.gql";
 
 export default {
   name: "LoginFormComponent",
   data(){
     return{
-      username:'',
-      password:''
+      credentils: {
+        email: '',
+        password: ''
+      }
     };
 
   },
   components: {
     Index,
   },
+  methods: {
+    async onSubmit() {
+      console.log("apollo", this.$apollo)
+      let res = await this.$apollo.mutate({
+        mutation: login,
+      })
+
+      console.log(res)
+    },
+  }
 };
 </script>
 
