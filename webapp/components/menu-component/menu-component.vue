@@ -1,7 +1,7 @@
 <template>
   <div class="menuButton">
     <template v-if="loggedIn"> 
-      <button @click="logout">Logout</button>
+      <button @click="logoutUser">Logout</button>
     </template>
     <template v-else>
       <NuxtLink to="/login">Login</NuxtLink>
@@ -19,6 +19,15 @@ export default {
   },
   methods: {
     ...mapActions('auth', ['logout']),
+    ...mapActions('auth', ['cookieLogin']),
+    logoutUser() {
+      this.logout()
+      this.$apolloHelpers.onLogout()
+    }
+  },
+  created () {
+    let token = this.$apolloHelpers.getToken()
+    if (token) this.cookieLogin({token})
   },
 };
 </script>

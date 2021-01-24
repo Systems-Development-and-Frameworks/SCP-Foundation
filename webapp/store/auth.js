@@ -40,8 +40,6 @@ export const actions = {
       let tokenDecoded = jwt_decode(token)
       commit(SET_USER_ID, tokenDecoded.userId)
       commit(SET_TOKEN, token)
-
-
     } catch (err) {
       if (err.message === WRONG_CREDENTIALS) return false
       throw err
@@ -52,4 +50,9 @@ export const actions = {
   logout({ commit }) {
     commit(SET_TOKEN, null)
   },
+  cookieLogin({commit}, {token}) {
+    let tokenDecoded = jwt_decode(token)
+    commit(SET_USER_ID, tokenDecoded.userId)
+    commit(SET_TOKEN, token)
+  }
 }
