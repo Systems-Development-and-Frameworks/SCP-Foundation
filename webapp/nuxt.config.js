@@ -36,6 +36,8 @@ export default {
   apollo: {
     clientConfigs: {
       default: {
+        authenticationType: 'Bearer',
+        tokenName: 'SET_TOKEN',
         httpEndpoint: 'http://localhost:4000'
       }
     }

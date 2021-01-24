@@ -1,3 +1,4 @@
+import { WRONG_CREDENTIALS } from '../plugins/api.js'
 import { SET_LOADING } from './store.js'
 
 export const state = () => ({
@@ -30,7 +31,7 @@ export const actions = {
   async vote({ commit },{ postId, voteValue, apollo }) {
     commit(SET_LOADING, true)
     try {
-      const posts = await this.$api.posts({ apollo});
+      const posts = await this.$api.vote({postId, voteValue, apollo});
       return posts.data;
     } catch (err) {
       if (err.message === WRONG_CREDENTIALS) return false

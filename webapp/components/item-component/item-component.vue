@@ -18,7 +18,7 @@
 
 <script>
 import Item from "../../classes/item";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "ItemComponent",
@@ -28,15 +28,17 @@ export default {
   computed: {
     ...mapGetters("auth", ["loggedIn"]),
     ...mapGetters("auth", ["currentUserId"]),
+    ...mapActions('posts', ['vote']),
   },
   methods: {
     removeItem(item) {
       this.$emit("removeEvent", item);
     },
 
-    updateItem(item, value) {
+    async updateItem(item, value) {
       if (this.loggedIn) {
         const currentVotes = item.getVotes();
+        await this.vote({postId: item.id, voteValue: value, apollo: this.$apollo});
         item.setVotes(currentVotes + value);
         this.$emit("updateEvent", item);
       } else {

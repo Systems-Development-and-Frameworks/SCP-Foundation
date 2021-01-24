@@ -25,10 +25,11 @@ export default (_context, inject) => {
             return res;
         },
         async vote({ postId, voteValue, apollo }) {
-          let res = await apollo.query({
-              query: vote
+          let res = await apollo.mutate({
+              mutation: vote,
+              variables: {postId, voteValue}
           })
-          return res;
+          console.log(res)
       },
     })
 }
