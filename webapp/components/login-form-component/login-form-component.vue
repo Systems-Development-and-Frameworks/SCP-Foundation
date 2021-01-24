@@ -30,11 +30,13 @@ export default {
   },
   computed: {
     ...mapGetters('auth', ['loggedIn']),
+    ...mapGetters('auth', ['token']),
   },
   methods: {
     ...mapActions('auth', ['login']),
     async onSubmit() {
       await this.login({...this.credentials, apollo: this.$apollo})
+      this.$apolloHelpers.onLogin(this.token)
       this.credentials.email = ""
       this.credentials.password = ""
 

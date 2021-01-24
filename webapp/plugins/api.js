@@ -29,7 +29,7 @@ export default (_context, inject) => {
               mutation: vote,
               variables: {postId, voteValue}
           })
-          console.log(res)
+          return res
       },
     })
 }

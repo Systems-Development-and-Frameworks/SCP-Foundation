@@ -1,3 +1,6 @@
 mutation vote ($postId:ID!, $voteValue:Int!) {
-    vote(postId: $postId, voteValue: $voteValue)
+    vote(postId: $postId, voteValue: $voteValue) {
+        id
+        voteResult
+    }
 }

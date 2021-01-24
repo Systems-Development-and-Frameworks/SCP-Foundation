@@ -28,9 +28,10 @@ export default {
   computed: {
     ...mapGetters("auth", ["loggedIn"]),
     ...mapGetters("auth", ["currentUserId"]),
-    ...mapActions('posts', ['vote']),
   },
   methods: {
+    ...mapActions('posts', ['vote']),
+    
     removeItem(item) {
       this.$emit("removeEvent", item);
     },
@@ -38,8 +39,8 @@ export default {
     async updateItem(item, value) {
       if (this.loggedIn) {
         const currentVotes = item.getVotes();
-        await this.vote({postId: item.id, voteValue: value, apollo: this.$apollo});
-        item.setVotes(currentVotes + value);
+        let post = await this.vote({postId: item.id, voteValue: value, apollo: this.$apollo});
+        item.setVotes(post.vote.voteResult);
         this.$emit("updateEvent", item);
       } else {
         this.$router.push("/login");
