@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
-import ListComponent from 'components/list-component/list-component.vue'
-import Item from 'classes/item.js'
-import ItemComponent from 'components/item-component/item-component.vue'
+import ListComponent from './list-component.vue'
+import Item from '../../classes/item.js'
+import ItemComponent from '../item-component/item-component.vue'
 
 describe('list-component', () => {
     describe('item list', () => {
@@ -49,7 +49,7 @@ describe('list-component', () => {
                         item.votes == 5
                     )).toBe(false)
                 })
-            
+
                 it('does not remove item 2', async () => {
                     component.findComponent(ItemComponent).vm.$emit('removeEvent', {
                         id:1, title:"Eintrag1", votes:5
@@ -61,7 +61,7 @@ describe('list-component', () => {
                         item.votes == 2
                     )).toBe(true)
                 })
-            
+
                 it('does not remove item 3', async () => {
                     component.findComponent(ItemComponent).vm.$emit('removeEvent', {
                         id:1, title:"Eintrag1", votes:5
@@ -85,7 +85,7 @@ describe('list-component', () => {
                         item.votes == 5
                     )).toBe(false)
                 })
-                
+
                 it('adds new item 1', async () => {
                     component.findComponent(ItemComponent).vm.$emit('updateEvent', new Item(1, "Eintrag1", 6))
                     await component.vm.$nextTick()
@@ -95,7 +95,7 @@ describe('list-component', () => {
                         item.votes == 6
                     )).toBe(true)
                 })
-                
+
                 it('does not remove item 2', async () => {
                     component.findComponent(ItemComponent).vm.$emit('updateEvent', new Item(1, "Eintrag1", 6))
                     await component.vm.$nextTick()
@@ -105,7 +105,7 @@ describe('list-component', () => {
                         item.votes == 2
                     )).toBe(true)
                 })
-            
+
                 it('does not remove item 3', async () => {
                     component.findComponent(ItemComponent).vm.$emit('updateEvent', new Item(1, "Eintrag1", 6))
                     await component.vm.$nextTick()

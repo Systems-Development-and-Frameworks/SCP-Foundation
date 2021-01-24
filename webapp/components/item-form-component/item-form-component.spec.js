@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import ItemFormComponent from 'components/item-form-component/item-form-component.vue'
+import ItemFormComponent from './item-form-component.vue'
 
 describe('item-form-component', () => {
     let component

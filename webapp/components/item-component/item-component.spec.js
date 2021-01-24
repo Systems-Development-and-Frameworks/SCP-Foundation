@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
-import ItemComponent from 'components/item-component/item-component.vue'
-import Item from 'classes/item.js'
+import ItemComponent from './item-component.vue'
+import Item from '../../classes/item.js'
 
 describe('item-component', () => {
 let component
