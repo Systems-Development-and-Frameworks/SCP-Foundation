@@ -52,7 +52,6 @@ export default {
 
     async getPostIterable(){
       let postList = await this.getPosts({apollo:this.$apollo})
-      console.log(postList.posts)
       this.itemList = postList.posts.map(p => new Item(p.id, p.title, p.voteResult, p.author))
     },
 

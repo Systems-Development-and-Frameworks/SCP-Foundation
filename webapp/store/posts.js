@@ -26,4 +26,18 @@ export const actions = {
       commit(SET_LOADING, false)
     }
   },
+
+  async vote({ commit },{ postId, voteValue, apollo }) {
+    commit(SET_LOADING, true)
+    try {
+      const posts = await this.$api.posts({ apollo});
+      return posts.data;
+    } catch (err) {
+      if (err.message === WRONG_CREDENTIALS) return false
+      throw err
+    } finally {
+      commit(SET_LOADING, false)
+    }
+  },
+
 }

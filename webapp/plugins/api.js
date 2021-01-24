@@ -1,5 +1,6 @@
 import login from "../gql/login.gql";
 import posts from "../gql/posts.gql";
+import vote from "../gql/vote.gql";
 
 export const WRONG_CREDENTIALS = "User or password incorrect."
 
@@ -23,5 +24,11 @@ export default (_context, inject) => {
             })
             return res;
         },
+        async vote({ postId, voteValue, apollo }) {
+          let res = await apollo.query({
+              query: vote
+          })
+          return res;
+      },
     })
 }
