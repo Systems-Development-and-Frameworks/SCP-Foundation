@@ -22,9 +22,9 @@ describe('list-component', () => {
                 component = mount(ListComponent, {
                     data() { return {
                         itemList: [
-                            new Item(1, "Eintrag1", 5),
-                            new Item(2, "Eintrag2", 2),
-                            new Item(3, "Eintrag3", -2)
+                            new Item(1, "Eintrag1", 5, {id: 1}),
+                            new Item(2, "Eintrag2", 2, {id: 1}),
+                            new Item(3, "Eintrag3", -2, {id: 2})
                         ]
                     }}
                 })

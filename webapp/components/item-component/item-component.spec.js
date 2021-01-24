@@ -8,7 +8,7 @@ let component
     beforeEach(() => {
         component = mount(ItemComponent, {
             propsData: {
-                item : new Item(1, "Eintrag2", 2)
+                item : new Item(1, "Eintrag2", 2, {id: 1})
             }
         });
     })
