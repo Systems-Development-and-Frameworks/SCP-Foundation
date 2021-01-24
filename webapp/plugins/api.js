@@ -3,7 +3,7 @@ import posts from "../gql/posts.gql";
 import vote from "../gql/vote.gql";
 import createPost from "../gql/write.gql";
 
-export const WRONG_CREDENTIALS = "User or password incorrect."
+export const WRONG_CREDENTIALS = "Email or password incorrect."
 export const UNAUTHORIZED = "You are not authorized."
 
 export default (_context, inject) => {

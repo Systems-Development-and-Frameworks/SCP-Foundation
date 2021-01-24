@@ -3,7 +3,8 @@
     <form class="sign-in" @submit.prevent="onSubmit">
       <h2> Sign In </h2>
       <div>Use your account</div>
-      <input class="input_sign" id="username" type="text" placeholder="Username" v-model="credentials.email"/>
+      <div v-if="error" class="error">{{ error.message }}</div>
+      <input class="input_sign" id="email" type="text" placeholder="Email" v-model="credentials.email"/>
       <input class="input_sign" id="password" type="password"  placeholder="Password" v-model="credentials.password"/>
       <input class="button_sign" type="submit" value="Login" name="login" id="login" />
     </form>
@@ -18,6 +19,7 @@ export default {
   name: "LoginFormComponent",
   data(){
     return{
+      error: null,
       credentials: {
         email: '',
         password: ''
@@ -35,8 +37,19 @@ export default {
   methods: {
     ...mapActions('auth', ['login']),
     async onSubmit() {
-      await this.login({...this.credentials, apollo: this.$apollo})
-      this.$apolloHelpers.onLogin(this.token)
+      let loginSuccess = false
+      try {
+        loginSuccess = await this.login({...this.credentials, apollo: this.$apollo})
+      }
+      catch {
+        this.error = { message: "Oops! Something went wrong." }
+      }
+
+      if (loginSuccess)
+        this.$apolloHelpers.onLogin(this.token)
+      else
+        this.error = { message: "Email or password incorrect." }
+
       this.credentials.email = ""
       this.credentials.password = ""
 
@@ -103,6 +116,10 @@ h2{
   letter-spacing: 1px;
   text-transform: uppercase;
   transition: transform .1s ease-in;      
+}
+
+.error {
+  color: #FF0000
 }
 
 </style>
