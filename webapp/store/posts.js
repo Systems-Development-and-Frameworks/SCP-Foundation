@@ -14,10 +14,11 @@ export const mutations = {
 }
 
 export const actions = {
-  async getPosts({ commit },{ apollo }) { 
+  async getPosts({ commit },{ apollo }) {
     commit(SET_LOADING, true)
     try {
-      const posts = await this.$api.posts({ apollo})
+      const posts = await this.$api.posts({ apollo});
+      return posts.data;
     } catch (err) {
       if (err.message === WRONG_CREDENTIALS) return false
       throw err

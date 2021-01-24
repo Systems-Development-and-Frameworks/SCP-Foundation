@@ -21,8 +21,7 @@ export default (_context, inject) => {
             let res = await apollo.query({
                 query: posts
             })
-
-            console.log(res.data)
+            return res;
         },
     })
 }

@@ -2,17 +2,19 @@ export default class  Item{
     id = null;
     title = null;
     votes = null;
-    
-    constructor(id, title, votes=0){
+    author = null;
+
+    constructor(id, title, votes=0, author){
         this.id = id;
         this.title = title;
         this.votes = votes;
+        this.author = author;
     }
 
     getId(){
         return this.id;
     }
-    
+
     getTitle(){
         return this.title;
     }
@@ -21,11 +23,19 @@ export default class  Item{
         return this.votes;
     }
 
+    getAuthor(){
+      return this.author;
+    }
+
     setTitle(title){
         this.title = title;
     }
 
     setVotes(votes){
         this.votes = votes;
+    }
+
+    setAuthor(author){
+      this.author = author;
     }
 }

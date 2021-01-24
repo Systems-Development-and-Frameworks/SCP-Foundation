@@ -38,16 +38,24 @@ export default {
   },
   data: function () {
     return {
-      itemList: [new Item(1, "Eintrag1"), new Item(2, "Eintrag2")],
+      // itemList: [new Item(1, "Eintrag1"), new Item(2, "Eintrag2")],
+      itemList: [],
       orderAscending: true,
     };
   },
-  created () {
-    console.log("Created")
-    this.getPosts({apollo:this.$apollo})
+  async created () {
+    await this.getPostIterable();
+
   },
   methods: {
     ...mapActions('posts', ['getPosts']),
+
+    async getPostIterable(){
+      let postList = await this.getPosts({apollo:this.$apollo})
+      console.log(postList.posts)
+      this.itemList = postList.posts.map(p => new Item(p.id, p.title, p.voteResult, p.author))
+    },
+
     removeItem(item) {
       this.itemList = this.itemList.filter((i) => {
         return item.id !== i.id;
