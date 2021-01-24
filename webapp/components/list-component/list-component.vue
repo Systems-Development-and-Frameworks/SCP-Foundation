@@ -18,8 +18,7 @@
       <h2 class="list-empty">The list is empty!</h2>
     </div>
 
-
-    <ItemFormComponent @submitEvent="onSubmit" v-if="loggedIn"/>
+    <ItemFormComponent @submitEvent="onSubmit" v-if="loggedIn" />
     <div></div>
   </div>
 </template>
@@ -49,6 +48,7 @@ export default {
   },
   methods: {
     ...mapActions('posts', ['getPosts']),
+    ...mapActions('posts', ['createPost']),
 
     async getPostIterable(){
       let postList = await this.getPosts({apollo:this.$apollo})
@@ -67,15 +67,9 @@ export default {
       });
     },
 
-    onSubmit(newTitle) {
-      var biggestId = Math.max.apply(
-        Math,
-        this.itemList.map((item) => {
-          return item.id;
-        })
-      );
-      const newId = biggestId + 1;
-      this.itemList.push(new Item(newId, newTitle));
+    async onSubmit(newTitle) {
+      let newPost = await this.createPost({title: newTitle, apollo: this.$apollo})
+      if (newPost) this.itemList.push(new Item(newPost.id, newPost.title, newPost.voteResult, newPost.author));
     },
   },
   computed: {

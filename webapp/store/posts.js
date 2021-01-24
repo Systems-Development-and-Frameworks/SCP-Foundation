@@ -1,4 +1,4 @@
-import { WRONG_CREDENTIALS } from '../plugins/api.js'
+import { UNAUTHORIZED } from '../plugins/api.js'
 import { SET_LOADING } from './store.js'
 
 export const state = () => ({
@@ -21,7 +21,7 @@ export const actions = {
       const posts = await this.$api.posts({ apollo});
       return posts.data;
     } catch (err) {
-      if (err.message === WRONG_CREDENTIALS) return false
+      if (err.message === UNAUTHORIZED) return false
       throw err
     } finally {
       commit(SET_LOADING, false)
@@ -34,11 +34,23 @@ export const actions = {
       const post = await this.$api.vote({postId, voteValue, apollo});
       return post.data;
     } catch (err) {
-      if (err.message === WRONG_CREDENTIALS) return false
+      if (err.message === UNAUTHORIZED) return false
       throw err
     } finally {
       commit(SET_LOADING, false)
     }
   },
 
+  async createPost({commit}, {title, apollo}) {
+    commit(SET_LOADING, true)
+    try {
+      const post = await this.$api.createPost({title, apollo});
+      return post.data.write;
+    } catch (err) {
+      if (err.message === UNAUTHORIZED) return false
+      throw err
+    } finally {
+      commit(SET_LOADING, false)
+    }
+  }
 }

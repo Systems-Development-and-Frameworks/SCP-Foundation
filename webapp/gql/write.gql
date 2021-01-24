@@ -1,0 +1,10 @@
+mutation createPost ($title:String!) {
+  write (data: {title: $title}) {
+    id
+    title
+    voteResult
+    author {
+      id
+    }
+  }
+}
