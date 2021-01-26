@@ -1,5 +1,5 @@
 import { WRONG_CREDENTIALS } from '../plugins/api.js'
-import { SET_USER_ID, SET_TOKEN, SET_LOADING } from './store.js'
+import { SET_USER_ID, SET_TOKEN, SET_LOADING } from './index.js'
 import jwt_decode from 'jwt-decode'
 
 export const state = () => ({

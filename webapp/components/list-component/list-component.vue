@@ -27,7 +27,7 @@
 import ItemComponent from "../item-component/item-component";
 import ItemFormComponent from "../item-form-component/item-form-component";
 import Item from "../../classes/item";
-import { mapGetters, mapActions } from "vuex"
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "List",
@@ -37,22 +37,24 @@ export default {
   },
   data: function () {
     return {
-      // itemList: [new Item(1, "Eintrag1"), new Item(2, "Eintrag2")],
       itemList: [],
       orderAscending: true,
     };
   },
-  async created () {
+  async created() {
     await this.getPostIterable();
-
   },
   methods: {
-    ...mapActions('posts', ['getPosts']),
-    ...mapActions('posts', ['createPost']),
+    ...mapActions("posts", ["getPosts"]),
+    ...mapActions("posts", ["createPost"]),
 
-    async getPostIterable(){
-      let postList = await this.getPosts({apollo:this.$apollo})
-      this.itemList = postList.posts.map(p => new Item(p.id, p.title, p.voteResult, p.author))
+    async getPostIterable() {
+      let postList = await this.getPosts({ apollo: this.$apollo });
+      if (postList.posts && postList.posts.length > 0) {
+        this.itemList = postList.posts.map(
+          (p) => new Item(p.id, p.title, p.voteResult, p.author)
+        );
+      }
     },
 
     removeItem(item) {
@@ -68,21 +70,30 @@ export default {
     },
 
     async onSubmit(newTitle) {
-      let newPost = await this.createPost({title: newTitle, apollo: this.$apollo})
-      if (newPost) this.itemList.push(new Item(newPost.id, newPost.title, newPost.voteResult, newPost.author));
+      let newPost = await this.createPost({
+        title: newTitle,
+        apollo: this.$apollo,
+      });
+      if (newPost)
+        this.itemList.push(
+          new Item(
+            newPost.id,
+            newPost.title,
+            newPost.voteResult,
+            newPost.author
+          )
+        );
     },
   },
   computed: {
     sortedArray() {
       var newArray = [...this.itemList];
       return newArray.sort((a, b) => {
-        if (this.orderAscending)
-          return b.votes - a.votes
-        else
-          return a.votes - b.votes
+        if (this.orderAscending) return b.votes - a.votes;
+        else return a.votes - b.votes;
       });
     },
-    ...mapGetters('auth', ['loggedIn']),
+    ...mapGetters("auth", ["loggedIn"]),
   },
 };
 </script>

@@ -40,15 +40,14 @@ export default {
       let loginSuccess = false
       try {
         loginSuccess = await this.login({...this.credentials, apollo: this.$apollo})
+              if (loginSuccess)
+        this.$apolloHelpers.onLogin(this.token)
+      else
+        this.error = { message: "Email or password incorrect." }
       }
       catch {
         this.error = { message: "Oops! Something went wrong." }
       }
-
-      if (loginSuccess)
-        this.$apolloHelpers.onLogin(this.token)
-      else
-        this.error = { message: "Email or password incorrect." }
 
       this.credentials.email = ""
       this.credentials.password = ""
@@ -103,7 +102,7 @@ h2{
                     0 1px 0 #fff;
   overflow: hidden;
 
-  
+
   }
 .button_sign{
   border-radius: 20px;
@@ -111,11 +110,11 @@ h2{
   background-color:#009345 ;
   color: #fff;
   font-size: 1rem;
-  
+
   padding: 10px 40px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  transition: transform .1s ease-in;      
+  transition: transform .1s ease-in;
 }
 
 .error {

@@ -1,61 +1,144 @@
-import { mount } from '@vue/test-utils'
-import ItemComponent from './item-component.vue'
-import Item from '../../classes/item.js'
+import { shallowMount, createLocalVue } from "@vue/test-utils";
+import Vuex from "vuex";
+import ItemComponent from "./item-component.vue";
+import Item from "../../classes/item.js";
 
-describe('item-component', () => {
-let component
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
-    beforeEach(() => {
-        component = mount(ItemComponent, {
-            propsData: {
-                item : new Item(1, "Eintrag2", 2, {id: 1})
-            }
-        });
-    })
+describe("item-component", () => {
+  let wrapper;
+  let authActions;
+  let authGetters;
+  let postsActions;
+  let postsGetters;
+  let store;
 
-    it('contains item title and votes Expected --> Eintrag (2)', () => {
-        expect(component.text()).toContain('Eintrag2 (2)')
-    })
+  const setupWrapper = () => {
+    store = new Vuex.Store({
+      modules: {
+        auth: {
+          namespaced: true,
+          state: () => ({
+            loading: false,
+            currentUser: "1",
+            token: "SomeRandomToken"
+          }),
+          actions: authActions,
+          getters: authGetters
+        },
+        posts: {
+          namespaced: true,
+          state: () => ({
+            loading: false
+          }),
+          actions: postsActions,
+          getters: postsGetters
+        }
+      }
+    });
+    return shallowMount(ItemComponent, {
+      store,
+      localVue,
+      propsData: {
+        item: new Item(1, "Eintrag2", 2, { id: "1" })
+      }
+    });
+  };
 
-    it('emits remove event', async () => {
-        const removeButton = component.find('.remove-button')
-        removeButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().removeEvent).toBeTruthy()
-    })
+  beforeEach(() => {
+    authGetters = {
+      loggedIn: () => true,
+      currentUserId: () => "1"
+    };
+  });
 
-    it('emits update event +1', async () => {
-        const upvoteButton = component.find('.upvote-button')
-        upvoteButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().updateEvent).toBeTruthy()
-    })
+  it("contains item title and votes Expected --> Eintrag (2)", () => {
+    wrapper = setupWrapper();
+    expect(wrapper.text()).toContain("Eintrag2 (2)");
+  });
 
-    it('emits update event -1', async () => {
-        const downvoteButton = component.find('.downvote-button')
-        downvoteButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().updateEvent).toBeTruthy()
-    })
+  it("doesn't show the remove button due to not being the owner", () => {
+    authGetters = {
+      loggedIn: () => true,
+      currentUserId: () => "2"
+    };
+    wrapper = setupWrapper();
+    expect(wrapper.find(".remove-button").exists()).toBeFalsy();
+  });
 
-    it('updates votes +1', async () => {
-        const upvoteButton = component.find('.upvote-button')
-        upvoteButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().updateEvent[0][0].votes).toEqual(3)
-    })
+  it("doesn't show the remove button due to not being logged in", () => {
+    authGetters = {
+      loggedIn: () => false,
+    };
+    wrapper = setupWrapper();
+    expect(wrapper.find(".remove-button").exists()).toBeFalsy();
+  });
 
-    it('updates votes -1', async () => {
-        const downvoteButton = component.find('.downvote-button')
-        downvoteButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().updateEvent[0][0].votes).toEqual(1)
-    })
+  it("emits remove event", async () => {
+    wrapper = setupWrapper();
+    const removeButton = wrapper.find(".remove-button");
+    await removeButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().removeEvent).toBeTruthy();
+  });
 
-    it('emits remove event with correct item', async () => {
-        const removeButton = component.find('.remove-button')
-        removeButton.trigger('click')
-        await component.vm.$nextTick()
-        expect(component.emitted().removeEvent[0][0]).toEqual({id: 1, title: 'Eintrag2', votes: 2})
-    })
-})
+  it("emits update event +1", async () => {
+    postsActions = {
+      vote: jest.fn().mockResolvedValue({vote: {voteResult: 3}})
+    };
+    wrapper = setupWrapper();
+    const upvoteButton = wrapper.find(".upvote-button");
+    await upvoteButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().updateEvent).toBeTruthy();
+  });
+
+  it("emits update event -1", async () => {
+    postsActions = {
+      vote: jest.fn().mockResolvedValue({vote: {voteResult: 1}})
+    };
+    wrapper = setupWrapper();
+    const downvoteButton = wrapper.find(".downvote-button");
+    await downvoteButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().updateEvent).toBeTruthy();
+  });
+
+  it("updates votes +1", async () => {
+    postsActions = {
+      vote: jest.fn().mockResolvedValue({vote: {voteResult: 3}})
+    };
+    wrapper = setupWrapper();
+    const upvoteButton = wrapper.find(".upvote-button");
+    await upvoteButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().updateEvent[0][0].votes).toEqual(3);
+  });
+
+  it("updates votes -1", async () => {
+    postsActions = {
+      vote: jest.fn().mockResolvedValue({vote: {voteResult: 1}})
+    };
+    wrapper = setupWrapper();
+    const downvoteButton = wrapper.find(".downvote-button");
+    await downvoteButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().updateEvent[0][0].votes).toEqual(1);
+  });
+
+  it("emits remove event with correct item", async () => {
+    wrapper = setupWrapper();
+    const removeButton = wrapper.find(".remove-button");
+    await removeButton.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted().removeEvent[0][0]).toEqual({
+      id: 1,
+      title: "Eintrag2",
+      votes: 2,
+      author: {
+        id: "1"
+      }
+    });
+  });
+});

@@ -1,5 +1,5 @@
 import { UNAUTHORIZED } from '../plugins/api.js'
-import { SET_LOADING } from './store.js'
+import { SET_LOADING } from './index.js'
 
 export const state = () => ({
   loading: false

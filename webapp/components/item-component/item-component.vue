@@ -30,8 +30,8 @@ export default {
     ...mapGetters("auth", ["currentUserId"]),
   },
   methods: {
-    ...mapActions('posts', ['vote']),
-    
+    ...mapActions("posts", ["vote"]),
+
     removeItem(item) {
       this.$emit("removeEvent", item);
     },
