@@ -57,6 +57,10 @@ describe("list-component", () => {
         postsActions = {
           getPosts: jest.fn().mockResolvedValue({})
         };
+        authGetters = {
+          loggedIn: () => true,
+          currentUserId: () => "1"
+        };
         wrapper = setupWrapper();
         const h2Element = wrapper.find(".list-empty");
         expect(h2Element.text()).toEqual("The list is empty!");
@@ -98,13 +102,14 @@ describe("list-component", () => {
       describe("receives remove event for item 1", () => {
         it("removes item 1", async () => {
           wrapper = setupWrapper();
-          wrapper.findComponent(ItemComponent).vm.$emit("removeEvent", {
+          await wrapper.findComponent(ItemComponent).vm.$emit("removeEvent", {
             id: 1,
             title: "Eintrag1",
             votes: 5,
             author: {id: "1"}
           });
           await wrapper.vm.$nextTick();
+          console.log(wrapper.vm.$data.itemList)
           expect(
             wrapper.vm.$data.itemList.some(
               item =>
@@ -151,7 +156,7 @@ describe("list-component", () => {
           wrapper = setupWrapper();
           wrapper
             .findComponent(ItemComponent)
-            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6));
+            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6, {id: 1}));
           await wrapper.vm.$nextTick();
           expect(
             wrapper.vm.$data.itemList.some(
@@ -165,7 +170,7 @@ describe("list-component", () => {
           wrapper = setupWrapper();
           wrapper
             .findComponent(ItemComponent)
-            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6));
+            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6, {id: 1}));
           await wrapper.vm.$nextTick();
           expect(
             wrapper.vm.$data.itemList.some(
@@ -179,7 +184,7 @@ describe("list-component", () => {
           wrapper = setupWrapper();
           wrapper
             .findComponent(ItemComponent)
-            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6));
+            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6, {id: 1}));
           await wrapper.vm.$nextTick();
           expect(
             wrapper.vm.$data.itemList.some(
@@ -193,7 +198,7 @@ describe("list-component", () => {
           wrapper = setupWrapper();
           wrapper
             .findComponent(ItemComponent)
-            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6));
+            .vm.$emit("updateEvent", new Item(1, "Eintrag1", 6, {id: 1}));
           await wrapper.vm.$nextTick();
           expect(
             wrapper.vm.$data.itemList.some(
