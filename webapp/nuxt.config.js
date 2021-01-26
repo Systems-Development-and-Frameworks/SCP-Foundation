@@ -8,7 +8,7 @@ export default {
       { hid: 'description', name: 'description', content: '' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/icon.png' }
     ]
   },
 
@@ -53,7 +53,9 @@ export default {
 
   pwa: {
     manifest: {
-      icon: false
+      name: 'SCP-Foundation',
+      lang: 'en',
+      start_url: '/',
     }
   }
 }
