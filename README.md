@@ -15,8 +15,9 @@ You need NodeJS, NPM, VueJS installed on your computer. To run the application, 
 
 1. Navigate to `./webapp/`.
 2. Run `npm install`.
-3. Run `npm run serve` to start the application server.
-4. Open `localhost:8080` in your web browser to view the application.
+3. Run `npm run dev` to start the application server for development.
+4. Open `localhost:3000` in your web browser to view the application.
+5. For deployment and execution run `npm run build && npm run start` (both commands can alternatively be run seperately).
 
 ### Backend
 
