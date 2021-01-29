@@ -1,7 +1,7 @@
 <template>
   <div>
     
-    <b-navbar toggleable="md" type="dark" variant="dark" sticky>
+    <b-navbar toggleable="md" class="custom-header" type="dark" sticky>
       <b-container fluid="lg">
         <b-navbar-brand href="#">SCP-Foundation</b-navbar-brand>
 
@@ -109,12 +109,9 @@
       </b-row>
     </b-container>
 
-    <div>
-      <div class="fluid-container footer">
-        <p class="text-center">Copyright 2021, SCP Foundation. All Rights Reserved.</p>
-      </div>
+    <div class="fluid-container footer custom-footer">
+      <div class="text-center">Copyright 2021, SCP Foundation. All Rights Reserved.</div>
     </div>
-
   </div>
 </template>
 
@@ -122,7 +119,7 @@
 export default {
   data() {
     return {
-      mainProps: { blank: true, blankColor: '#777', width: 150, height: 150, class: 'm1' }
+      mainProps: { blank: true, blankColor: '#777', width: 150, height: 150, class: 'm1' },
     }
   }
 };
@@ -172,5 +169,15 @@ export default {
 
 .item {
   padding: 15px;
+}
+
+.custom-header {
+  background-color: black;
+}
+
+.custom-footer {
+  background-color: black;
+  color: white;
+  padding: 10px 0px 10px 0px;
 }
 </style>
